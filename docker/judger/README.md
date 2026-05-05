@@ -97,16 +97,6 @@ Each problem has translations in:
 - 🇬🇧 English (EN)
 - 🇹🇯 Tajik (TJ)
 
-## Security Features
-
-- ✅ Network isolation (no internet access)
-- ✅ Memory limits enforced by cgroups
-- ✅ CPU time limits enforced by cgroups
-- ✅ Non-root user execution
-- ✅ Temporary directory cleanup
-- ✅ Container removal after execution
-- ✅ Output size limits
-
 ## Testing
 
 ```bash
