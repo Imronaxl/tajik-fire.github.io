@@ -34,7 +34,6 @@ env/
 .idea/
 *.swp
 *.swo
-*.tmp
 
 # Database
 *.db
