@@ -2,8 +2,8 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: devstudio_pro
+      dockerfile: fastapi_app/Dockerfile
+    container_name: tajik_fire
     ports:
       - "8000:8000"
     environment:
@@ -14,14 +14,15 @@ services:
       JUDGER_BACKEND: ${JUDGER_BACKEND:-subprocess}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@devstudio.io}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@tajik-fire.io}
+      FRONTEND_DIST: /app/frontend/dist
     volumes:
-      - ./app/static:/app/app/static:ro
-      - ./app/templates:/app/app/templates:ro
+      - ./frontend/src:/app/frontend/src:ro
+      - ./fastapi_app/app:/app/app:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 12s
+      start_period: 15s
