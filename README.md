@@ -379,7 +379,3 @@ GitHub Actions (`.github/workflows/ci.yml`):
 3. **Docker image**: сборка образа + проверка `/health`
 
 ---
-
-## Лицензия
-
-[MIT](./LICENSE) — форкайте, шипьте, учитесь.
