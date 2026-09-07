@@ -1,6 +1,6 @@
 <script>
-  import { i18n, t } from '../i18n/index.js';
-  import { SUPPORTED_LANGUAGES } from '../i18n/config.js';
+  import { i18n, t } from '../../core/i18n/index.js';
+  import { SUPPORTED_LANGUAGES } from '../../core/i18n/config.js';
 
   let open = false;
 
