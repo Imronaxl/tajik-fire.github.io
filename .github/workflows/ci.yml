@@ -252,6 +252,7 @@ jobs:
           context: .
           file: fastapi_app/Dockerfile
           push: false
+          load: true
           tags: tajik-fire:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
