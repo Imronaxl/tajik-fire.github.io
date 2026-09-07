@@ -38,6 +38,13 @@ jobs:
           sudo apt-get install -y --no-install-recommends g++ default-jdk-headless
           g++ --version | head -1
           java -version 2>&1 | head -1
+          echo "---bits/stdc++.h check---"
+          find /usr/include /usr/include/x86_64-linux-gnu -name "stdc++.h" 2>/dev/null | head -3 || echo "not found"
+          echo "---compile test---"
+          echo '#include <bits/stdc++.h>
+          using namespace std;
+          int main() { cout << "hello" << endl; return 0; }' > /tmp/t.cpp
+          g++ -std=c++17 -O2 -o /tmp/t /tmp/t.cpp && echo "compile OK" || echo "compile FAIL"
 
       - name: Install Python deps
         run: |
@@ -161,7 +168,11 @@ jobs:
                       v = r.json()['verdict']
                       if v not in ('pending', 'judging'):
                           break
-                  assert v == 'accepted', f'expected accepted, got {v}'
+                  if v != 'accepted':
+                      err = r.json().get('error_message', '(no error message)')
+                      print(f'FAIL: verdict={v}')
+                      print(f'  error_message: {err[:500]}')
+                      raise SystemExit(1)
                   print(f'OK: C++ verdict={v}')
 
           asyncio.run(run())
