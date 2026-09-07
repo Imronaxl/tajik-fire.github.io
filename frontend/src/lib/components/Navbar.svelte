@@ -1,20 +1,21 @@
 <script>
   import { push } from '../router.js';
-  import { onMount } from 'svelte';
   import { user, logout, ready } from '../auth.js';
   import { toasts } from '../toast.js';
   import { initials } from '../utils.js';
+  import { t } from '../../core/i18n/index.js';
+  import LanguageSwitcher from './LanguageSwitcher.svelte';
 
   let menuOpen = false;
   let dropdownOpen = false;
 
-  const links = [
-    { href: '/', label: 'Главная' },
-    { href: '/problems', label: 'Задачи' },
-    { href: '/olympiads', label: 'Контесты' },
-    { href: '/learning', label: 'Обучение' },
-    { href: '/leaderboard', label: 'Рейтинг' },
-    { href: '/messenger', label: 'Сообщения', auth: true },
+  const navLinks = [
+    { href: '/', key: 'nav.home' },
+    { href: '/problems', key: 'nav.problems' },
+    { href: '/olympiads', key: 'nav.contests' },
+    { href: '/learning', key: 'nav.learning' },
+    { href: '/leaderboard', key: 'nav.leaderboard' },
+    { href: '/messenger', key: 'nav.messenger', auth: true },
   ];
 
   function go(href) {
@@ -25,7 +26,7 @@
 
   async function handleLogout() {
     await logout();
-    toasts.success('Вы вышли из аккаунта.');
+    toasts.success($t('toast.signedOut'));
     push('/');
   }
 
@@ -40,25 +41,27 @@
     <a href="/" class="brand" on:click|preventDefault={() => go('/')}>
       <div class="brand__logo">T</div>
       <div class="brand__text">
-        <strong>tajik-fire</strong>
-        <small>competitive platform</small>
+        <strong>{$t('brand.name')}</strong>
+        <small>{$t('brand.tagline')}</small>
       </div>
     </a>
 
     <div class="menu" class:menu--open={menuOpen}>
-      {#each links as link}
+      {#each navLinks as link}
         {#if !link.auth || $user}
           <a
             href={link.href}
             class="menu__link"
             class:active={isActive(link.href)}
             on:click|preventDefault={() => go(link.href)}
-          >{link.label}</a>
+          >{$t(link.key)}</a>
         {/if}
       {/each}
     </div>
 
     <div class="actions">
+      <LanguageSwitcher />
+
       {#if $user}
         <button class="btn btn--secondary btn--sm" on:click={() => dropdownOpen = !dropdownOpen}>
           <div class="avatar avatar--sm avatar--gradient">{initials($user.username)}</div>
@@ -69,16 +72,16 @@
         </button>
         {#if dropdownOpen}
           <div class="dropdown" on:click|self={() => dropdownOpen = false}>
-            <a href="/profile" class="dropdown__item" on:click|preventDefault={() => go('/profile')}>Профиль</a>
-            <a href="/tasks" class="dropdown__item" on:click|preventDefault={() => go('/tasks')}>Мои задачи</a>
-            <a href="/submissions" class="dropdown__item" on:click|preventDefault={() => go('/submissions')}>Мои сабмиты</a>
+            <a href="/profile" class="dropdown__item" on:click|preventDefault={() => go('/profile')}>{$t('nav.profile')}</a>
+            <a href="/tasks" class="dropdown__item" on:click|preventDefault={() => go('/tasks')}>{$t('nav.tasks')}</a>
+            <a href="/submissions" class="dropdown__item" on:click|preventDefault={() => go('/submissions')}>{$t('nav.submissions')}</a>
             <div class="dropdown__divider"></div>
-            <button class="dropdown__item dropdown__item--danger" on:click={handleLogout}>Выйти</button>
+            <button class="dropdown__item dropdown__item--danger" on:click={handleLogout}>{$t('nav.signout')}</button>
           </div>
         {/if}
       {:else}
-        <a href="/login" class="btn btn--ghost btn--sm" on:click|preventDefault={() => go('/login')}>Войти</a>
-        <a href="/register" class="btn btn--primary btn--sm" on:click|preventDefault={() => go('/register')}>Начать</a>
+        <a href="/login" class="btn btn--ghost btn--sm" on:click|preventDefault={() => go('/login')}>{$t('nav.signin')}</a>
+        <a href="/register" class="btn btn--primary btn--sm" on:click|preventDefault={() => go('/register')}>{$t('nav.signup')}</a>
       {/if}
 
       <button class="btn btn--ghost btn--icon btn--sm mobile-toggle" on:click={() => menuOpen = !menuOpen} aria-label="Menu">

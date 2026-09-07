@@ -1,0 +1,55 @@
+{
+  "nav.home": "Главная",
+  "nav.problems": "Задачи",
+  "nav.contests": "Контесты",
+  "nav.learning": "Обучение",
+  "nav.leaderboard": "Рейтинг",
+  "nav.messenger": "Сообщения",
+  "nav.profile": "Профиль",
+  "nav.tasks": "Задачи",
+  "nav.submissions": "Сабмиты",
+  "nav.news": "Новости",
+  "nav.signin": "Войти",
+  "nav.signup": "Начать",
+  "nav.signout": "Выйти",
+  "nav.search": "Поиск...",
+
+  "brand.name": "tajik-fire",
+  "brand.tagline": "Платформа соревновательного программирования",
+
+  "home.hero.title1": "Пиши код.",
+  "home.hero.title2": "Получай вердикт.",
+  "home.hero.title3": "Поднимайся в рейтинге.",
+  "home.hero.cta.start": "Начать",
+  "home.hero.cta.browse": "Смотреть задачи",
+
+  "auth.welcome.title": "С возвращением.",
+  "auth.tab.login": "Вход",
+  "auth.tab.register": "Регистрация",
+  "auth.tab.reset": "Сброс пароля",
+
+  "common.loading": "Загрузка...",
+  "common.save": "Сохранить",
+  "common.cancel": "Отмена",
+  "common.delete": "Удалить",
+  "common.edit": "Редактировать",
+  "common.close": "Закрыть",
+
+  "verdict.accepted": "Accepted",
+  "verdict.wrongAnswer": "Wrong answer",
+  "verdict.tle": "TLE",
+  "verdict.mle": "MLE",
+  "verdict.runtimeError": "Runtime error",
+  "verdict.compileError": "Compilation error",
+  "verdict.pending": "Pending",
+  "verdict.judging": "Judging",
+
+  "language.toggle": "Язык",
+  "language.tg": "Тоҷикӣ",
+  "language.ru": "Русский",
+  "language.en": "English",
+
+  "ai.title": "ИИ-ассистент",
+  "ai.btn": "ИИ",
+  "ai.comingSoon": "ИИ-ассистент скоро будет доступен."
+}

@@ -17,7 +17,8 @@ export function formatDate(value, opts = {}) {
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
   if (opts.relative) return relativeTime(d);
-  return d.toLocaleString('ru-RU', {
+  const lang = (typeof document !== 'undefined' && document.documentElement.lang) || 'tg';
+  return d.toLocaleString(lang === 'tg' ? 'ru-RU' : lang, {
     year: 'numeric', month: 'short', day: '2-digit',
     hour: '2-digit', minute: '2-digit',
   });
@@ -25,6 +26,15 @@ export function formatDate(value, opts = {}) {
 
 export function relativeTime(d) {
   const diff = (Date.now() - d.getTime()) / 1000;
+  const lang = (typeof document !== 'undefined' && document.documentElement.lang) || 'tg';
+  if (lang === 'tg') {
+    if (diff < 5) return 'ҳозир';
+    if (diff < 60) return `${Math.floor(diff)} сония пеш`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} дақиқа пеш`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} соат пеш`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} рӯз пеш`;
+    return d.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' });
+  }
   if (diff < 5) return 'только что';
   if (diff < 60) return `${Math.floor(diff)} сек назад`;
   if (diff < 3600) return `${Math.floor(diff / 60)} мин назад`;
@@ -47,17 +57,21 @@ export function verdictClass(v) {
   return 'badge';
 }
 
-export function verdictLabel(v) {
-  return ({
-    accepted: 'Accepted',
-    wrong_answer: 'Wrong answer',
-    time_limit_exceeded: 'TLE',
-    memory_limit_exceeded: 'MLE',
-    runtime_error: 'Runtime error',
-    compilation_error: 'Compilation error',
-    pending: 'Pending',
-    judging: 'Judging',
-  })[v] || v || '—';
+export function verdictLabel(v, t) {
+  if (!v) return '—';
+  const map = {
+    accepted: 'verdict.accepted',
+    wrong_answer: 'verdict.wrongAnswer',
+    time_limit_exceeded: 'verdict.tle',
+    memory_limit_exceeded: 'verdict.mle',
+    runtime_error: 'verdict.runtimeError',
+    compilation_error: 'verdict.compileError',
+    pending: 'verdict.pending',
+    judging: 'verdict.judging',
+  };
+  const key = map[v] || map[v.toLowerCase()];
+  if (key && t) return t(key);
+  return v;
 }
 
 export function languageLabel(l) {

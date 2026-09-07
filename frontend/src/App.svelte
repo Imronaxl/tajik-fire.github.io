@@ -2,10 +2,12 @@
   import { onMount, onDestroy } from 'svelte';
   import { initAuth, user, ready } from './lib/auth.js';
   import { toasts } from './lib/toast.js';
+  import { i18n } from './core/i18n/index.js';
 
   import Navbar from './lib/components/Navbar.svelte';
   import Footer from './lib/components/Footer.svelte';
   import ToastStack from './lib/components/ToastStack.svelte';
+  import AIAssistant from './lib/components/AIAssistant.svelte';
 
   import Home from './routes/pages/Home.svelte';
   import Auth from './routes/pages/Auth.svelte';
@@ -32,11 +34,12 @@
 
   onMount(() => {
     initAuth();
+    i18n.init();
     window.addEventListener('popstate', handlePop);
     window.addEventListener('pushstate', handlePop);
     window.addEventListener('unhandledrejection', (e) => {
       if (e.reason?.status === 401) return;
-      toasts.error(e.reason?.message || 'Сетевая ошибка');
+      toasts.error(e.reason?.message || 'Хатои шабака');
     });
   });
 
@@ -97,6 +100,7 @@
 </main>
 <Footer />
 <ToastStack />
+<AIAssistant />
 
 <style>
   main { flex: 1; display: flex; flex-direction: column; }
