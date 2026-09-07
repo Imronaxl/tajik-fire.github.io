@@ -1,7 +1,7 @@
 # tajik-fire
 
 <p align="center">
-  <strong>Платформаи барномасозии рақобатӣ бо судяи sandbox, роҳҳои омӯзишӣ ва фармони иҷтимоӣ.</strong>
+  <strong>Платформа соревновательного программирования с sandbox-судьёй, учебными треками и социальной лентой.</strong>
 </p>
 
 <p align="center">
@@ -14,49 +14,51 @@
 </p>
 
 <p align="center">
-  <a href="#дархостҳои-асосӣ">Дархостҳои асосӣ</a> ·
-  <a href="#скриншотҳо">Скриншотҳо</a> ·
-  <a href="#меъморӣ">Меъморӣ</a> ·
-  <a href="#сохтори-лоиҳа">Сохтор</a> ·
-  <a href="#забонҳо">Забонҳо</a> ·
-  <a href="#тестҳо">Тестҳо</a> ·
+  <a href="#возможности">Возможности</a> ·
+  <a href="#скриншоты">Скриншоты</a> ·
+  <a href="#архитектура">Архитектура</a> ·
+  <a href="#структура-проекта">Структура</a> ·
+  <a href="#языки-i18n">Языки</a> ·
+  <a href="#тесты">Тесты</a> ·
   <a href="#api">API</a>
 </p>
 
 ---
 
-**tajik-fire** — платформаи барномасозии рақобатӣ дар услуби Codeforces бо трекери омӯзишӣ. Бэкенд дар FastAPI ҳалли Python, C++ ва Java-ро дар раванди ҷудогона месанҷад, фронтенд дар Svelte 4 ба як бандли ~126 КБ (39 КБ gzip) ҷамъ мешавад ва бе virtual DOM кор мекунад.
+**tajik-fire** — платформа соревновательного программирования в духе Codeforces с трекером учёбы. Бэкенд на FastAPI проверяет решения на Python, C++ и Java в изолированном подпроцессе, фронтенд на Svelte 4 собирается в один бандл ~158 КБ (45 КБ gzip) и работает без virtual DOM.
+
+Интерфейс пользователя по умолчанию на таджикском языке. Поддерживаются три языка: таджикский (по умолчанию), русский и английский. Переключатель языка в навбаре. Техническая документация, код и коммиты — на русском.
 
 ---
 
-## Дархостҳои асосӣ
+## Возможности
 
-- **Судяи sandbox** — ҳар сабт дар раванди ҷудогона бо `RLIMIT_AS` ва wall-clock таймаут иҷро мешавад. Python 3, C++ 17 ва Java 11 дастгирӣ мешаванд.
-- **Аутентификатсияи JWT** — access-токени кӯтоҳ (30 дақ), refresh-токен 7 рӯз, throttle кӯшишҳои воридшавӣ, bcrypt.
-- **Email опционалӣ** — бе SMTP кодҳои тасдиқ дар ҷавоби API баргардонида мешаванд, аз ин рӯ локалӣ аз бе почта фаъолият кардан мумкин аст.
-- **Многоязычность (i18n)** — интерфейс ва шарҳи масъалаҳо ба се забон тарҷума шудааст: тоҷикӣ (пешфарз), русӣ, англисӣ. Иловаи забони нав — як сатр дар конфиг.
-- **Фарми сабтҳо дар вақти воқеӣ** — ҳар вердикт ба ҷадвали алоҳида навишта мешавад ва дар дашборд, саҳифаи асосӣ ва бахши «Сабтҳо» нишон дода мешавад.
-- **Системаи рейтинг** — ҳали аввал хол медиҳад: осон +5, миёна +12, душвор +25. Топ-3 ба подиум меафтанд.
-- **ИИ-ёрдамчи (placeholder)** — тугмаи шинокунанда дар ҳар саҳифа, модули AI дар бэкенд ҷойгир аст. Иловаи LLM дар оянда танҳо бо иваз кардани як модул.
-- **Архитектураи модулӣ** — ҳар функсия (competitive, learning, social, tasks, ai) модули алоҳида. Барои илова намудани cybersecurity ё дигар намуди вазифаҳо — танҳо модули нав эҷод кунед.
+- **Sandbox-судья** — каждое решение запускается в изолированном процессе с `RLIMIT_AS` и wall-clock таймаутом. Python 3, C++ 17 и Java 11.
+- **JWT-аутентификация** — короткий access-токен (30 мин), refresh-токен на 7 дней, throttle попыток входа, bcrypt.
+- **Email опционален** — без SMTP коды подтверждения возвращаются в ответе API, так что можно разрабатывать локально без почты.
+- **Многоязычность (i18n)** — интерфейс и условия задач переведены на таджикский, русский и английский. Добавление нового языка — одна строка в конфиге.
+- **Лента сабмитов в реальном времени** — каждый вердикт пишется в отдельную таблицу и отображается на дашборде, главной странице и в разделе «Сабтҳо».
+- **Система рейтинга** — за первое решение задачи начисляются очки: easy +5, medium +12, hard +25. Топ-3 попадают на подиум.
+- **ИИ-ассистент (placeholder)** — плавающая кнопка на каждой странице, модуль AI встроен в бэкенд. Для подключения реального LLM достаточно заменить один файл `service.py`.
+- **Модульная архитектура** — каждая функция (competitive, learning, social, tasks, ai) — отдельный модуль. Для добавления cybersecurity или другого типа задач просто создаёте новую папку-модуль.
 
 ---
 
-## Скриншотҳо
+## Скриншоты
 
-Скриншотҳо аз барномаи воқеӣ гирифта шудаанд (Playwright, 1440×900, retina). Файлҳо дар [`docs/screenshots/`](./docs/screenshots).
+Скриншоты сделаны на реальном запущенном приложении через Playwright (1440×900, retina). Файлы в [`docs/screenshots/`](./docs/screenshots).
 
 <table>
   <tr>
-    <td width="50%" align="center"><b>Асосӣ</b></td>
-    <td width="50%" align="center"><b>Архиви масъалаҳо</b></td>
+    <td width="50%" align="center"><b>Главная</b></td>
+    <td width="50%" align="center"><b>Архив задач</b></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/01-home.png" alt="Асосӣ"></td>
-    <td><img src="docs/screenshots/03-problems.png" alt="Масъалаҳо"></td>
+    <td><img src="docs/screenshots/01-home.png" alt="Главная"></td>
+    <td><img src="docs/screenshots/03-problems.png" alt="Задачи"></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><b>Редактори код</b></td>
+    <td width="50%" align="center"><b>Редактор кода</b></td>
     <td width="50%" align="center"><b>Рейтинг</b></td>
   </tr>
   <tr>
@@ -64,18 +66,18 @@
     <td><img src="docs/screenshots/08-leaderboard.png" alt="Рейтинг"></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><b>Канбони вазифаҳо</b></td>
+    <td width="50%" align="center"><b>Канбан задач</b></td>
     <td width="50%" align="center"><b>Профил</b></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/12-tasks.png" alt="Вазифаҳо"></td>
+    <td><img src="docs/screenshots/12-tasks.png" alt="Задачи"></td>
     <td><img src="docs/screenshots/14-profile.png" alt="Профил"></td>
   </tr>
 </table>
 
 ---
 
-## Меъморӣ
+## Архитектура
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -116,20 +118,20 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-Судя ҳамчун `asyncio`-вазифаи пасзамина барои ҳар сабт кор мекунад: сессияи навро мекушояд, коди корбарро тавассути `subprocess.run` бо маҳдудияти ҳофиза ва wall-clock таймаут иҷро мекунад, вердиктро ба `submissions` менависад ва ба `submission_feed` илова мекунад. Фронтенд эндпоинти сабтро то иваз шудани вердикт аз `pending` / `judging` ҳар 800 мс мепурсад.
+Судья запускается как `asyncio`-фоновая задача на каждый сабмит: открывает новую сессию БД, выполняет код пользователя через `subprocess.run` с лимитом памяти и wall-clock таймаутом, пишет вердикт в `submissions` и добавляет запись в `submission_feed`. Фронтенд опрашивает эндпоинт сабмита до смены вердикта с `pending` / `judging` каждые 800 мс.
 
 ---
 
-## Сохтори лоиҳа
+## Структура проекта
 
 ```
 .
 ├── .github/workflows/ci.yml        # CI: ruff + smoke + judge + Docker
-├── docs/screenshots/                # Скриншотҳои UI
-├── tests/                           # Ҳама тестҳо (ниже детально)
+├── docs/screenshots/                # Скриншоты UI
+├── tests/                           # Все тесты (см. раздел «Тесты»)
 │   ├── conftest.py                  # общие фикстуры
-│   ├── unit/                        # unit-тесты (пари 0.2 сек)
-│   ├── integration/                 # API интеграционные (пари 17 сек)
+│   ├── unit/                        # unit-тесты (0.2 сек)
+│   ├── integration/                 # API-интеграционные (17 сек)
 │   ├── e2e/                         # Playwright E2E
 │   ├── load/                        # Locust нагрузочные
 │   └── README.md
@@ -138,8 +140,8 @@
 │       ├── app.css                  # дизайн-система (токены)
 │       ├── App.svelte               # корневой компонент
 │       ├── core/
-│       │   └── i18n/                # ← ИЛОВА КАРДАНИ ЗАБОН ДАР ИН ҶО
-│       │       ├── config.js        #     рӯйхати забонҳо
+│       │   └── i18n/                # ← ДОБАВЛЕНИЕ ЯЗЫКА ЗДЕСЬ
+│       │       ├── config.js        #     список языков
 │       │       ├── index.js        #     движок t('key')
 │       │       └── locales/        #     tg.json, ru.json, en.json
 │       ├── lib/
@@ -150,17 +152,17 @@
 │       │   ├── utils.js             # formatDate, verdict helpers, markdown
 │       │   └── components/          # Navbar, Footer, ToastStack,
 │       │                            # LanguageSwitcher, AIAssistant
-│       └── routes/pages/           # ҳар саҳифа алоҳида
+│       └── routes/pages/           # каждая страница — отдельный .svelte
 ├── fastapi_app/
-│   ├── main.py                      # FastAPI app + модульҳо
+│   ├── main.py                      # FastAPI app + модули
 │   ├── requirements.txt
 │   ├── Dockerfile                   # многоэтапная сборка
 │   └── app/
 │       ├── core/
 │       │   ├── config.py            # pydantic-settings
 │       │   └── database.py          # async engine
-│       ├── api/                     # руты по доменам
-│       ├── modules/                 # ← СТРУКТУРА МОДУЛӢ
+│       ├── api/                     # роуты по доменам
+│       ├── modules/                 # ← МОДУЛЬНАЯ СТРУКТУРА
 │       │   ├── registry.py          #   реестр модулей
 │       │   ├── accounts/            #   auth, users, profile
 │       │   ├── social/              #   messenger, friends
@@ -174,7 +176,7 @@
 │       ├── services/
 │       │   ├── email_service.py     # SMTP + HTML-шаблоны
 │       │   ├── password_service.py
-│       │   └── judger/              # судя
+│       │   └── judger/              # судья
 │       ├── middleware/rate_limiter.py
 │       └── data/seed_problems.py    # демо-данные
 ├── docker-compose.yml
@@ -184,47 +186,47 @@
 
 ---
 
-## Забонҳо (i18n)
+## Языки (i18n)
 
-Системаи многоязычности дар як нуқта марказонида шудааст — **`frontend/src/core/i18n/config.js`**.
+Система многоязычности централизована в одной точке — **`frontend/src/core/i18n/config.js`**.
 
-### Иловаи забони нав
+### Добавление нового языка
 
-Барои илова кардани забон (масалан, узбекӣ):
+Чтобы добавить язык (например, узбекский):
 
-1. Файли `frontend/src/core/i18n/locales/uz.json` эҷод кунед (аз `tg.json` нусха бардоред ва тарҷума кунед)
-2. Дар `config.js` як сатр илова кунед:
+1. Создайте файл `frontend/src/core/i18n/locales/uz.json` (скопируйте из `tg.json` и переведите)
+2. В `config.js` добавьте одну строку:
 
 ```js
 export const SUPPORTED_LANGUAGES = [
   { code: 'tg', name: 'Тоҷикӣ', nativeName: 'Тоҷикӣ', file: () => import('./locales/tg.json') },
-  { code: 'uz', name: 'O‘zbek', nativeName: 'O‘zbekcha', file: () => import('./locales/uz.json') },  // ← нав
+  { code: 'uz', name: 'O‘zbek', nativeName: 'O‘zbekcha', file: () => import('./locales/uz.json') },  // ← новый
   { code: 'ru', name: 'Русский', nativeName: 'Русский', file: () => import('./locales/ru.json') },
   { code: 'en', name: 'English', nativeName: 'English', file: () => import('./locales/en.json') },
 ];
 ```
 
-Ҳама — забон дар переключатели автоматӣ пайдо мешавад, забони пешфарз аз `localStorage` ё аз забони браузер муайян мешавад.
+Готово — язык появится в переключателе автоматически, выбор сохраняется в `localStorage`.
 
-### Тарҷумаи серверӣ
+### Язык по умолчанию
 
-Барои тарҷумаи шарҳи масъалаҳо дар бэкенд — `app/core/i18n.py` (планируется). Ҳоло шарҳҳо дар `seed_problems.py` дар се забон ҳамроҳ карда мешаванд.
+Таджикский (`tg`). Определяется при первом визите: берётся из `localStorage`, если нет — из языка браузера, если не поддерживается — таджикский.
 
 ---
 
-## Тестҳо
+## Тесты
 
-Папкаи `tests/` ҳама тестҳои платформаро дар бар мегирад:
+Папка `tests/` содержит все тесты платформы:
 
 ```
 tests/
 ├── conftest.py                 # общие фикстуры (db, client, auth_token)
-├── unit/                       # 23 unit-тесты (0.2 сек)
+├── unit/                        # 23 unit-теста (0.2 сек)
 │   ├── test_password_service.py
-│   ├── test_verifiers.py       #   судья
+│   ├── test_verifiers.py        #   судья
 │   ├── test_email_service.py
 │   └── test_config.py
-├── integration/                # 49 integration-тесты (17 сек)
+├── integration/                 # 49 integration-тестов (17 сек)
 │   ├── test_auth_api.py        #   auth, JWT, password
 │   ├── test_problems_api.py    #   problems, submissions
 │   ├── test_tasks_api.py       #   personal tasks
@@ -233,7 +235,7 @@ tests/
 │   ├── test_judger_api.py      #   judge pipeline
 │   ├── test_ai_assistant_api.py
 │   └── test_stats_api.py
-├── e2e/                        # Playwright E2E
+├── e2e/                         # Playwright E2E
 │   └── test_user_journey.py
 └── load/                        # Locust нагрузочные
     └── locustfile.py
@@ -242,16 +244,16 @@ tests/
 ### Запуск
 
 ```bash
-# Ҳама тестҳо
+# Все тесты
 pytest tests/unit tests/integration -v
 
-# Танҳо unit (0.2 сония)
+# Только unit (0.2 сек)
 pytest tests/unit -v
 
-# Танҳо integration (17 сония)
+# Только integration (17 сек)
 pytest tests/integration -v
 
-# E2E (need running backend)
+# E2E (нужен запущенный backend)
 uvicorn main:app --reload &  # in fastapi_app/
 pytest tests/e2e -v
 
@@ -261,18 +263,18 @@ cd tests/load && locust -f locustfile.py --host=http://localhost:8000
 
 ### Покрытие
 
-| Уровень      | Тестҳо                                                  |
+| Уровень      | Что проверяет                                            |
 |--------------|----------------------------------------------------------|
 | unit         | изолированные функции: пароль, вердикт, email, конфиг   |
-| integration  | ҳар эндпоинти API: статус-коды, хатоҳо, бизнес-логика   |
-| e2e          | UI пользовательский путь в реальном браузере            |
+| integration  | каждый эндпоинт API: статус-коды, ошибки, бизнес-логика |
+| e2e          | UI пользовательский путь в реальном браузере           |
 | load         | поведение под нагрузкой: RPS, латентность, ошибки       |
 
 ---
 
 ## API
 
-49 эндпоинтов, в OpenAPI документированы.
+49 эндпоинтов, задокументированы в OpenAPI.
 
 - **Swagger UI**: <http://localhost:8000/docs>
 - **ReDoc**: <http://localhost:8000/redoc>
@@ -282,29 +284,29 @@ cd tests/load && locust -f locustfile.py --host=http://localhost:8000
 
 | Метод | Путь                              | Описание                                |
 |-------|-----------------------------------|-----------------------------------------|
-| POST  | `/api/auth/register`              | Бақайдгирӣ                              |
-| POST  | `/api/auth/login`                 | Воридшавӣ                               |
-| POST  | `/api/auth/refresh`               | Навсозии токенҳо                        |
-| POST  | `/api/auth/logout`                | Баромадан                               |
-| GET   | `/api/auth/me`                    | Корбари ҷорӣ                            |
-| POST  | `/api/auth/change-password`       | Тағйири парол                           |
-| PUT   | `/api/auth/profile`               | Таҳрири профил                          |
+| POST  | `/api/auth/register`              | Регистрация                              |
+| POST  | `/api/auth/login`                 | Вход                                     |
+| POST  | `/api/auth/refresh`               | Обновление токенов                       |
+| POST  | `/api/auth/logout`                | Выход                                   |
+| GET   | `/api/auth/me`                    | Текущий пользователь                    |
+| POST  | `/api/auth/change-password`       | Смена пароля                             |
+| PUT   | `/api/auth/profile`               | Редактирование профиля                   |
 
-### Масъалаҳо ва сабтҳо
+### Задачи и сабмиты
 
 | Метод | Путь                                | Описание                              |
 |-------|-------------------------------------|---------------------------------------|
-| GET   | `/api/problems/`                    | Рӯйхат бо филтрҳо                     |
-| GET   | `/api/problems/{id}?lang=tg\|ru\|en` | Тафсилот бо тарҷума                   |
-| POST  | `/api/problems/submissions`         | Сабти ҳал                              |
+| GET   | `/api/problems/`                    | Список с фильтрами                     |
+| GET   | `/api/problems/{id}?lang=tg\|ru\|en` | Детали с переводом                     |
+| POST  | `/api/problems/submissions`          | Отправка решения                       |
 | GET   | `/api/problems/submissions/{id}`    | Вердикт                                |
 
 ### AI Assistant
 
 | Метод | Путь              | Описание                              |
 |-------|-------------------|---------------------------------------|
-| GET   | `/api/ai/status`  | Статуси ИИ (placeholder)              |
-| POST  | `/api/ai/chat`    | Чат бо ИИ (ҷавоби placeholder)        |
+| GET   | `/api/ai/status`  | Статус ИИ (placeholder)              |
+| POST  | `/api/ai/chat`    | Чат с ИИ (placeholder-ответ)         |
 
 ---
 
@@ -316,14 +318,14 @@ cd tests/load && locust -f locustfile.py --host=http://localhost:8000
 git clone https://github.com/Imronaxl/tajik-fire.github.io.git
 cd tajik-fire.github.io
 
-# Backend
+# Бэкенд
 cd fastapi_app
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 
-# Frontend
+# Фронтенд
 cd ../frontend
 npm install
 npm run build
@@ -333,7 +335,7 @@ cd ../fastapi_app
 uvicorn main:app --reload
 ```
 
-Боз: <http://localhost:8000>. Демо-аккаунт: `demo / Demo1234`.
+Открыть: <http://localhost:8000>. Демо-аккаунт: `demo / Demo1234`.
 
 ### Dev-режим фронтенда (с HMR)
 
@@ -372,12 +374,12 @@ docker compose up --build
 
 GitHub Actions (`.github/workflows/ci.yml`):
 
-1. **Backend** (Python 3.11 + 3.12): ruff lint + smoke + судья на Python + C++ + AI assistant
-2. **Frontend** (Node 20): npm install + build + проверка размера бандла
-3. **Docker**: сборка образа + проверка `/health`
+1. **Backend tests** (Python 3.11 + 3.12): ruff lint + pytest (72 теста) + smoke + судья на Python и C++
+2. **Frontend build** (Node 20): npm install + build + проверка размера бандла
+3. **Docker image**: сборка образа + проверка `/health`
 
 ---
 
 ## Лицензия
 
-[MIT](./LICENSE) — форк кунед, кораб кунед, омӯзед.
+[MIT](./LICENSE) — форкайте, шипьте, учитесь.
