@@ -249,7 +249,8 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v6
         with:
-          context: fastapi_app
+          context: .
+          file: fastapi_app/Dockerfile
           push: false
           tags: tajik-fire:ci
           cache-from: type=gha
