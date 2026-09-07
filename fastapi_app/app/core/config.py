@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "DevStudio Pro"
+    PROJECT_NAME: str = "tajik-fire"
     VERSION: str = "1.0.0"
     DEBUG: bool = True
 

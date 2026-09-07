@@ -1,10 +1,11 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 from app.core.config import settings
 from app.db.database import init_db
@@ -18,31 +19,28 @@ logging.basicConfig(
     level=logging.INFO if settings.DEBUG else logging.WARNING,
     format="%(asctime)s | %(name)-12s | %(levelname)-7s | %(message)s",
 )
-logger = logging.getLogger("devstudio")
+logger = logging.getLogger("tajik_fire")
 
-
-def _gettext(value: str) -> str:
-    return value
-
-
-templates = Jinja2Templates(directory="app/templates")
-templates.env.globals["_"] = _gettext
-templates.env.globals["project_name"] = settings.PROJECT_NAME
-templates.env.globals["project_version"] = settings.VERSION
+FRONTEND_DIST = os.environ.get("FRONTEND_DIST", os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
+FRONTEND_EXISTS = os.path.isdir(FRONTEND_DIST)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    logger.info("app started v%s", settings.VERSION)
+    logger.info("tajik-fire v%s started", settings.VERSION)
+    if FRONTEND_EXISTS:
+        logger.info("serving frontend from %s", FRONTEND_DIST)
+    else:
+        logger.warning("frontend dist not built; run `npm run build` in frontend/")
     yield
-    logger.info("app shutting down")
+    logger.info("tajik-fire shutting down")
 
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Competitive programming platform with judger, learning tracks and social features.",
+    description="Платформа соревновательного программирования с песочницей-судьёй, учебными треками и социальной лентой.",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -58,8 +56,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
 api_prefix = "/api"
 app.include_router(auth.router, prefix=f"{api_prefix}/auth", tags=["Auth"])
 app.include_router(users.router, prefix=f"{api_prefix}/users", tags=["Users"])
@@ -73,52 +69,14 @@ app.include_router(friends.router, prefix=f"{api_prefix}/friends", tags=["Friend
 app.include_router(admin.router, prefix=f"{api_prefix}/admin", tags=["Admin"])
 app.include_router(stats.router, prefix=f"{api_prefix}", tags=["Stats"])
 
+if FRONTEND_EXISTS:
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-PAGES = {
-    "/": "index.html",
-    "/auth": "auth.html",
-    "/login": "auth.html",
-    "/register": "auth.html",
-    "/problems": "problems.html",
-    "/olympiads": "olympiads.html",
-    "/contests": "olympiads.html",
-    "/tasks": "tasks.html",
-    "/messenger": "messenger.html",
-    "/learning": "learning.html",
-    "/news": "news.html",
-    "/profile": "profile.html",
-    "/leaderboard": "leaderboard.html",
-    "/submissions": "submissions.html",
-    "/editor": "editor.html",
-}
-
-DYNAMIC_PAGES = [
-    ("/problems/{problem_id}/solve", "editor.html"),
-    ("/learning/{slug}", "learning.html"),
-]
-
-
-def _render_page(request: Request, template_name: str):
-    return templates.TemplateResponse(template_name, {
-        "request": request,
-        "current_user": None,
-    })
-
-
-for route, template in PAGES.items():
-    def _make_handler(tpl=template):
-        async def _handler(request: Request):
-            return _render_page(request, tpl)
-        return _handler
-    app.add_api_route(route, _make_handler(), methods=["GET"], include_in_schema=False)
-
-
-for route, template in DYNAMIC_PAGES:
-    def _make_dynamic_handler(tpl=template):
-        async def _handler(request: Request):
-            return _render_page(request, tpl)
-        return _handler
-    app.add_api_route(route, _make_dynamic_handler(), methods=["GET"], include_in_schema=False)
+    favicon = os.path.join(FRONTEND_DIST, "favicon.svg")
+    if os.path.exists(favicon):
+        app.mount("/favicon.svg", StaticFiles(directory=FRONTEND_DIST), name="favicon")
 
 
 @app.get("/health", tags=["Health"])
@@ -134,3 +92,31 @@ async def api_info():
         "docs": "/docs",
         "redoc": "/redoc",
     }
+
+
+INDEX_HTML = os.path.join(FRONTEND_DIST, "index.html") if FRONTEND_EXISTS else None
+
+
+@app.get("/{path:path}", include_in_schema=False)
+async def spa_fallback(request: Request, path: str):
+    if path.startswith("api/") or path.startswith("docs") or path.startswith("redoc") or path.startswith("health"):
+        return {"detail": "not found"}
+
+    if path.startswith("assets/"):
+        full = os.path.join(FRONTEND_DIST, path)
+        if os.path.isfile(full):
+            return FileResponse(full)
+        return {"detail": "asset not found"}
+
+    candidate = os.path.join(FRONTEND_DIST, path)
+    if path and os.path.isfile(candidate):
+        return FileResponse(candidate)
+
+    if INDEX_HTML and os.path.exists(INDEX_HTML):
+        return FileResponse(INDEX_HTML)
+
+    return HTMLResponse(
+        "<h1>tajik-fire backend is up</h1>"
+        "<p>Frontend not built. Run <code>npm install &amp;&amp; npm run build</code> in <code>frontend/</code>.</p>",
+        status_code=200,
+    )
