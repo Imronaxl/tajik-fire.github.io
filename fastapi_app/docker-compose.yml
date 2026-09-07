@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -9,20 +7,21 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - SECRET_KEY=${SECRET_KEY:-your-super-secret-key-change-in-production}
-      - DATABASE_URL=sqlite+aiosqlite:///./devstudio.db
-      - DEBUG=${DEBUG:-False}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-["http://localhost:8000","http://127.0.0.1:8000"]}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-please}
+      DATABASE_URL: sqlite+aiosqlite:////tmp/devstudio.db
+      DEBUG: ${DEBUG:-false}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-["http://localhost:8000"]}
+      JUDGER_BACKEND: ${JUDGER_BACKEND:-subprocess}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@devstudio.io}
     volumes:
-      - ./app/static:/app/app/static
-      - db_data:/app/data
+      - ./app/static:/app/app/static:ro
+      - ./app/templates:/app/app/templates:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
-
-volumes:
-  db_data:
+      start_period: 12s

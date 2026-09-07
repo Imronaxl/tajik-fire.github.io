@@ -1,0 +1,67 @@
+.submissions-table {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.submissions-row {
+  display: grid;
+  grid-template-columns: 60px 1.4fr 1.6fr 100px 140px 80px 100px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--transition-fast);
+}
+.submissions-row:last-child { border-bottom: none; }
+.submissions-row:hover { background: var(--bg-surface-2); }
+
+.submissions-row--head {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  background: var(--bg-surface-2);
+}
+.submissions-row--head:hover { background: var(--bg-surface-2); }
+
+.submissions-row__id { font-family: var(--font-mono); color: var(--text-tertiary); }
+.submissions-row__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 500;
+  font-size: var(--text-sm);
+}
+.submissions-row__problem {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.submissions-row__problem a { color: var(--text-primary); }
+.submissions-row__problem a:hover { color: var(--accent); }
+.submissions-row__time { font-family: var(--font-mono); color: var(--text-secondary); font-size: var(--text-xs); }
+.submissions-row__when { color: var(--text-tertiary); font-size: var(--text-xs); }
+
+.lang-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  padding: 2px 6px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+}
+
+@media (max-width: 920px) {
+  .submissions-row { grid-template-columns: 40px 1fr 100px; }
+  .submissions-row > div:nth-child(3),
+  .submissions-row > div:nth-child(5),
+  .submissions-row > div:nth-child(6),
+  .submissions-row > div:nth-child(7) { display: none; }
+  .submissions-row--head > div:nth-child(3),
+  .submissions-row--head > div:nth-child(5),
+  .submissions-row--head > div:nth-child(6),
+  .submissions-row--head > div:nth-child(7) { display: none; }
+}

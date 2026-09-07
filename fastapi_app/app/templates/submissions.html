@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Submissions · DevStudio Pro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/submissions.css">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+  <header class="page-header">
+    <h1>Submissions</h1>
+    <p>Live feed of every judged submission across the platform. Filter by verdict or language to dig deeper.</p>
+  </header>
+
+  <div class="filter-pills mb-4">
+    <button class="pill active" data-verdict="" type="button">All</button>
+    <button class="pill pill--success" data-verdict="accepted" type="button">Accepted</button>
+    <button class="pill" data-verdict="wrong_answer" type="button">Wrong answer</button>
+    <button class="pill" data-verdict="time_limit_exceeded" type="button">TLE</button>
+    <button class="pill" data-verdict="runtime_error" type="button">Runtime error</button>
+    <button class="pill" data-verdict="compilation_error" type="button">Compile error</button>
+  </div>
+
+  <div class="submissions-table">
+    <div class="submissions-row submissions-row--head">
+      <div>#</div>
+      <div>Developer</div>
+      <div>Problem</div>
+      <div>Language</div>
+      <div>Verdict</div>
+      <div>Time</div>
+      <div>When</div>
+    </div>
+    <div id="submissions-body">
+      <div class="empty-state">
+        <div class="spinner"></div>
+        <p>Loading submissions…</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="/static/js/pages/submissions.js"></script>
+{% endblock %}

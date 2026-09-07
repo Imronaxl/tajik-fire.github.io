@@ -52,8 +52,8 @@ class User(Base):
     attempt_count = Column(Integer, default=0)
     
 
-    messages_sent = relationship("Message", foreign_keys="Message.sender_id", back_populates="sender", overlaps="sent_messages")
-    messages_received = relationship("Message", foreign_keys="Message.receiver_id", back_populates="receiver", overlaps="received_messages")
+    messages_sent = relationship("Message", foreign_keys="Message.sender_id", back_populates="sender")
+    messages_received = relationship("Message", foreign_keys="Message.receiver_id", back_populates="receiver")
     tasks = relationship("Task", back_populates="owner")
     chats = relationship("ChatMember", back_populates="user")
     
@@ -67,8 +67,6 @@ class User(Base):
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     blocked_users_blocking = relationship("BlockedUser", foreign_keys="BlockedUser.blocker_id", back_populates="blocker", cascade="all, delete-orphan")
     blocked_users_blocked = relationship("BlockedUser", foreign_keys="BlockedUser.blocked_id", back_populates="blocked", cascade="all, delete-orphan")
-    sent_messages = relationship("Message", foreign_keys="Message.sender_id", back_populates="sender", overlaps="messages_sent")
-    received_messages = relationship("Message", foreign_keys="Message.receiver_id", back_populates="receiver", overlaps="messages_received")
     enrollments = relationship("LearningEnrollment", back_populates="user", cascade="all, delete-orphan")
 
 

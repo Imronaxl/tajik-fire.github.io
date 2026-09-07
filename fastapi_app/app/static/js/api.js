@@ -1,169 +1,139 @@
-
+class ApiError extends Error {
+  constructor(message, status, payload) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.payload = payload;
+  }
+}
 
 class ApiClient {
-  constructor(baseURL = '') {
+  constructor(baseURL = '/api') {
     this.baseURL = baseURL;
-    this.token = localStorage.getItem('access_token');
+    this.accessToken = localStorage.getItem('access_token');
     this.refreshToken = localStorage.getItem('refresh_token');
+    this._refreshing = null;
   }
 
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+  getToken() { return this.accessToken; }
+
+  setTokens(access, refresh) {
+    this.accessToken = access;
+    this.refreshToken = refresh;
+    if (access) localStorage.setItem('access_token', access);
+    else localStorage.removeItem('access_token');
+    if (refresh) localStorage.setItem('refresh_token', refresh);
+    else localStorage.removeItem('refresh_token');
+  }
+
+  clearTokens() {
+    this.accessToken = null;
+    this.refreshToken = null;
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    window.dispatchEvent(new CustomEvent('auth:logout'));
+  }
+
+  isAuthenticated() { return !!this.accessToken; }
+
+  async request(path, options = {}) {
     const headers = new Headers(options.headers || {});
-
-    if (this.token) {
-      headers.set('Authorization', `Bearer ${this.token}`);
-    }
-
-    if (options.body && !(options.body instanceof FormData)) {
+    if (this.accessToken) headers.set('Authorization', `Bearer ${this.accessToken}`);
+    if (options.body && !headers.has('Content-Type') && !(options.body instanceof FormData)) {
       headers.set('Content-Type', 'application/json');
       options.body = JSON.stringify(options.body);
     }
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
+    const response = await fetch(`${this.baseURL}${path}`, { ...options, headers });
 
-      if (response.status === 401) {
-        return await this.handleUnauthorized(endpoint, options);
+    if (response.status === 401 && this.refreshToken && !options._retried) {
+      const refreshed = await this._refresh();
+      if (refreshed) {
+        return this.request(path, { ...options, _retried: true });
       }
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-        throw new ApiError(error.detail || 'Request failed', response.status);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return await response.json();
-      }
-
-      return await response.text();
-    } catch (error) {
-      if (error instanceof ApiError) throw error;
-      throw new ApiError('Network error. Please check your connection.', 0);
-    }
-  }
-
-  async handleUnauthorized(endpoint, options) {
-    if (!this.refreshToken) {
-      this.logout();
-      throw new ApiError('Session expired. Please log in again.', 401);
+      this.clearTokens();
+      throw new ApiError('session expired', 401);
     }
 
-    try {
-      const refreshResponse = await fetch(`${this.baseURL}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: this.refreshToken }),
-      });
-
-      if (!refreshResponse.ok) {
-        this.logout();
-        throw new ApiError('Session expired. Please log in again.', 401);
-      }
-
-      const data = await refreshResponse.json();
-      this.setTokens(data.access_token, data.refresh_token);
-
-      const headers = new Headers(options.headers || {});
-      headers.set('Authorization', `Bearer ${this.token}`);
-
-      if (options.body && !(options.body instanceof FormData)) {
-        headers.set('Content-Type', 'application/json');
-        options.body = JSON.stringify(options.body);
-      }
-
-      const response = await fetch(`${this.baseURL}${endpoint}`, {
-        ...options,
-        headers,
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-        throw new ApiError(error.detail || 'Request failed', response.status);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return await response.json();
-      }
-
-      return await response.text();
-    } catch (error) {
-      if (error instanceof ApiError) throw error;
-      throw new ApiError('Network error during token refresh.', 0);
+    if (!response.ok) {
+      let payload = null;
+      let message = `request failed (${response.status})`;
+      try {
+        payload = await response.json();
+        message = payload.detail || payload.message || message;
+      } catch (_) { }
+      throw new ApiError(message, response.status, payload);
     }
+
+    if (response.status === 204) return null;
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+    return response.text();
   }
 
-  get(endpoint, options = {}) {
-    return this.request(endpoint, { ...options, method: 'GET' });
+  async _refresh() {
+    if (!this._refreshing) {
+      this._refreshing = (async () => {
+        try {
+          const response = await fetch(`${this.baseURL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: this.refreshToken }),
+          });
+          if (!response.ok) return false;
+          const data = await response.json();
+          this.setTokens(data.access_token, data.refresh_token);
+          return true;
+        } catch (_) {
+          return false;
+        } finally {
+          this._refreshing = null;
+        }
+      })();
+    }
+    return this._refreshing;
   }
 
-  post(endpoint, body, options = {}) {
-    return this.request(endpoint, { ...options, method: 'POST', body });
+  get(path, params) {
+    return this.request(_withQuery(path, params), { method: 'GET' });
   }
 
-  put(endpoint, body, options = {}) {
-    return this.request(endpoint, { ...options, method: 'PUT', body });
+  post(path, body, params) {
+    return this.request(_withQuery(path, params), { method: 'POST', body });
   }
 
-  patch(endpoint, body, options = {}) {
-    return this.request(endpoint, { ...options, method: 'PATCH', body });
+  put(path, body, params) {
+    return this.request(_withQuery(path, params), { method: 'PUT', body });
   }
 
-  delete(endpoint, options = {}) {
-    return this.request(endpoint, { ...options, method: 'DELETE' });
+  patch(path, body, params) {
+    return this.request(_withQuery(path, params), { method: 'PATCH', body });
   }
 
-  upload(endpoint, formData, options = {}) {
-    const headers = options.headers || {};
-    delete headers['Content-Type'];
-    return this.request(endpoint, {
-      ...options,
-      method: 'POST',
-      body: formData,
-      headers,
-    });
+  delete(path, params) {
+    return this.request(_withQuery(path, params), { method: 'DELETE' });
   }
 
-  setTokens(accessToken, refreshToken) {
-    this.token = accessToken;
-    this.refreshToken = refreshToken;
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
-  }
-
-  logout() {
-    this.token = null;
-    this.refreshToken = null;
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    window.dispatchEvent(new CustomEvent('logout'));
-  }
-
-  isAuthenticated() {
-    return !!this.token;
+  upload(path, formData, params) {
+    return this.request(_withQuery(path, params), { method: 'POST', body: formData });
   }
 }
 
-class ApiError extends Error {
-  constructor(message, status) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
+function _withQuery(path, params) {
+  if (!params) return path;
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null || v === '') continue;
+    sp.append(k, v);
   }
+  const qs = sp.toString();
+  if (!qs) return path;
+  return path.includes('?') ? `${path}&${qs}` : `${path}?${qs}`;
 }
 
-const api = new ApiClient('/api');
-
-window.addEventListener('storage', (e) => {
-  if (e.key === 'access_token') {
-    api.token = e.newValue;
-  }
-  if (e.key === 'refresh_token') {
-    api.refreshToken = e.newValue;
-  }
-});
+export const api = new ApiClient();
+export { ApiError };
+export default api;

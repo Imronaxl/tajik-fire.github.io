@@ -1,176 +1,134 @@
+export const $ = (selector, root = document) => root.querySelector(selector);
+export const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
-
-export function formatDate(date, locale = 'en') {
-  if (!date) return '';
-  
-  const d = new Date(date);
-  const now = new Date();
-  const diffMs = now - d;
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-  const diffWeeks = Math.floor(diffDays / 7);
-  const diffMonths = Math.floor(diffDays / 30);
-  const diffYears = Math.floor(diffDays / 365);
-
-  const translations = {
-    en: { justNow: 'Just now', m: 'm ago', h: 'h ago', d: 'd ago', w: 'w ago', mo: 'mo ago', y: 'y ago' },
-    ru: { justNow: 'Только что', m: 'м назад', h: 'ч назад', d: 'д назад', w: 'н назад', mo: 'мес назад', y: 'л назад' },
-    es: { justNow: 'Justo ahora', m: 'm hace', h: 'h hace', d: 'd hace', w: 's hace', mo: 'meses hace', y: 'años hace' }
-  };
-
-  const t = translations[locale] || translations.en;
-
-  if (diffMins < 1) return t.justNow;
-  if (diffMins < 60) return `${diffMins}${t.m}`;
-  if (diffHours < 24) return `${diffHours}${t.h}`;
-  if (diffDays < 7) return `${diffDays}${t.d}`;
-  if (diffWeeks < 4) return `${diffWeeks}${t.w}`;
-  if (diffMonths < 12) return `${diffMonths}${t.mo}`;
-  return `${diffYears}${t.y}`;
-}
-
-export function formatDateTime(date, options = {}) {
-  if (!date) return '';
-  
-  const defaultOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  };
-
-  return new Intl.DateTimeFormat('en-US', { ...defaultOptions, ...options }).format(new Date(date));
-}
-
-export function truncate(str, length = 50, suffix = '...') {
-  if (!str) return '';
-  if (str.length <= length) return str;
-  return str.slice(0, length) + suffix;
-}
-
-export function debounce(func, wait = 300) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
-
-export function throttle(func, limit = 300) {
-  let inThrottle;
-  return function(...args) {
-    if (!inThrottle) {
-      func.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
-    }
-  };
-}
-
-export function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
-
-export function generateId() {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
-}
-
-export function getInitials(name) {
-  if (!name) return '?';
-  const parts = name.trim().split(' ');
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-}
-
-export function copyToClipboard(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    return navigator.clipboard.writeText(text);
+export function el(tagName, props = {}, children = []) {
+  const node = document.createElement(tagName);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === 'class' || k === 'className') node.className = v;
+    else if (k === 'dataset') Object.assign(node.dataset, v);
+    else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'html') node.innerHTML = v;
+    else if (v !== null && v !== undefined) node.setAttribute(k, v);
   }
-  
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-  textArea.style.position = 'fixed';
-  textArea.style.left = '-999999px';
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-  
-  return new Promise((resolve, reject) => {
-    try {
-      document.execCommand('copy');
-      resolve();
-    } catch (err) {
-      reject(err);
-    }
-    document.body.removeChild(textArea);
-  });
+  for (const child of [].concat(children)) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(String(child)));
+  }
+  return node;
 }
 
-export function downloadFile(data, filename, type = 'application/json') {
-  const blob = new Blob([data], { type });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
-
-export function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-export function parseQueryString(queryString) {
-  const params = {};
-  const queries = queryString.substring(1).split('&');
-  
-  queries.forEach(item => {
-    const [key, value] = item.split('=');
-    if (key) {
-      params[decodeURIComponent(key)] = value ? decodeURIComponent(value) : '';
-    }
-  });
-  
-  return params;
-}
-
-export function buildQueryString(params) {
-  return Object.entries(params)
-    .filter(([_, value]) => value !== undefined && value !== null)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-    .join('&');
-}
-
-export function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-export function retry(fn, retries = 3, delay = 1000) {
-  return async (...args) => {
-    let lastError;
-    
-    for (let i = 0; i < retries; i++) {
-      try {
-        return await fn(...args);
-      } catch (error) {
-        lastError = error;
-        if (i < retries - 1) {
-          await sleep(delay * Math.pow(2, i));
-        }
-      }
-    }
-    
-    throw lastError;
+export function debounce(fn, wait = 250) {
+  let t;
+  return function debounced(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
   };
+}
+
+export function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function formatDate(value, opts = {}) {
+  if (!value) return '—';
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  if (opts.relative) return relativeTime(d);
+  return d.toLocaleString(undefined, {
+    year: 'numeric', month: 'short', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+export function relativeTime(d) {
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 5) return 'just now';
+  if (diff < 60) return `${Math.floor(diff)}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+export function initials(name) {
+  if (!name) return '?';
+  return name.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('');
+}
+
+export function difficultyClass(difficulty) {
+  return `difficulty difficulty--${(difficulty || 'easy').toLowerCase()}`;
+}
+
+export function verdictClass(verdict) {
+  if (!verdict) return 'badge';
+  const v = verdict.toLowerCase();
+  if (v === 'accepted') return 'badge badge--success';
+  if (v === 'wrong_answer') return 'badge badge--danger';
+  if (v === 'pending' || v === 'judging') return 'badge badge--accent';
+  if (v === 'time_limit_exceeded' || v === 'memory_limit_exceeded') return 'badge badge--warning';
+  return 'badge';
+}
+
+export function verdictLabel(verdict) {
+  const map = {
+    accepted: 'Accepted',
+    wrong_answer: 'Wrong answer',
+    time_limit_exceeded: 'Time limit',
+    memory_limit_exceeded: 'Memory limit',
+    runtime_error: 'Runtime error',
+    compilation_error: 'Compilation error',
+    pending: 'Pending',
+    judging: 'Judging',
+  };
+  return map[verdict] || verdict || '—';
+}
+
+export function languageLabel(language) {
+  return ({
+    python3: 'Python 3',
+    cpp17: 'C++ 17',
+    java11: 'Java 11',
+  })[language] || language;
+}
+
+export function renderMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => `<pre class="code-block">${escapeHtml(code)}</pre>`)
+    .replace(/`([^`]+)`/g, (_, code) => `<code class="code-inline">${escapeHtml(code)}</code>`)
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^(?!<)(.+)$/gm, '<p>$1</p>')
+    .replace(/<p><h/g, '<h')
+    .replace(/<\/h\d><\/p>/g, '</h$1>');
+}
+
+export function copy(text) {
+  if (navigator.clipboard) return navigator.clipboard.writeText(text);
+  return Promise.reject(new Error('clipboard api unavailable'));
+}
+
+export function poll(fn, { interval = 800, timeout = 8000, shouldStop } = {}) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const tick = async () => {
+      try {
+        const value = await fn();
+        if (shouldStop ? shouldStop(value) : true) return resolve(value);
+      } catch (err) {
+        return reject(err);
+      }
+      if (Date.now() - start >= timeout) return reject(new Error('poll timeout'));
+      setTimeout(tick, interval);
+    };
+    tick();
+  });
 }
