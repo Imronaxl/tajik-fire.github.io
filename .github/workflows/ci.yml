@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -51,7 +51,7 @@ jobs:
       - name: Build frontend (for backend smoke)
         working-directory: frontend
         run: |
-          npm ci || npm install
+          npm install --no-audit --no-fund
           npm run build
 
       - name: Smoke test — приложение запускается
@@ -170,26 +170,26 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm install --no-audit --no-fund
 
       - name: Build frontend
         run: npm run build
 
       - name: Verify bundle size
         run: |
-          SIZE=$(stat -c%s dist/assets/*.js | head -1)
+          SIZE=$(stat -c%s dist/assets/*.js 2>/dev/null | head -1 || stat -f%z dist/assets/*.js | head -1)
           echo "Frontend bundle size: ${SIZE} bytes"
-          if [ "$SIZE" -gt 250000 ]; then
+          if [ -n "$SIZE" ] && [ "$SIZE" -gt 250000 ]; then
             echo "::warning::Bundle exceeds 250 KB"
           fi
 
@@ -208,7 +208,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
