@@ -50,9 +50,10 @@ jobs:
       - name: Run unit + integration tests
         env:
           SECRET_KEY: ci-secret-key-not-for-production
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           DEBUG: "true"
           FRONTEND_DIST: ""
+          PYTHONPATH: fastapi_app
         run: |
           pytest tests/unit tests/integration -v --tb=short
 
