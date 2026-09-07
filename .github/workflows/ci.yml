@@ -143,7 +143,7 @@ jobs:
           JUDGER_BACKEND: subprocess
           FRONTEND_DIST: ${{ github.workspace }}/frontend/dist
         run: |
-          python -c "
+          python << 'PYEOF'
           import asyncio
           from httpx import AsyncClient, ASGITransport
           from main import app
@@ -155,7 +155,15 @@ jobs:
                   r = await c.post('/api/auth/login', json={'login':'demo','password':'Demo1234'})
                   token = r.json()['access_token']
                   hdr = {'Authorization': f'Bearer {token}'}
-                  code = '#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    int a, b; cin >> a >> b;\n    cout << a + b << \"\\n\";\n    return 0;\n}\n'
+                  code = (
+                      '#include <bits/stdc++.h>\n'
+                      'using namespace std;\n'
+                      'int main() {\n'
+                      '    int a, b; cin >> a >> b;\n'
+                      '    cout << a + b << "\\n";\n'
+                      '    return 0;\n'
+                      '}\n'
+                  )
                   r = await c.post('/api/problems/submissions', headers=hdr, json={
                       'problem_id': 1,
                       'language': 'cpp17',
@@ -176,7 +184,7 @@ jobs:
                   print(f'OK: C++ verdict={v}')
 
           asyncio.run(run())
-          "
+          PYEOF
 
       - name: Upload artifacts on failure
         if: failure()
