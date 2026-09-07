@@ -1,39 +1,44 @@
-FROM python:3.11-slim
+FROM node:20-slim AS frontend-build
+WORKDIR /build
+COPY frontend/package*.json ./
+RUN npm ci || npm install
+COPY frontend/ ./
+RUN npm run build
 
-WORKDIR /app
+FROM python:3.12-slim AS base
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
+        build-essential \
+        gcc \
+        g++ \
+        default-jdk-headless \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+WORKDIR /app
 
-# Install Python dependencies
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+COPY fastapi_app/requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy application code
-COPY . .
+COPY fastapi_app/ .
 
-# Create non-root user for security
-RUN useradd --create-home --shell /bin/bash appuser && \
-    chown -R appuser:appuser /app
+COPY --from=frontend-build /build/dist /app/frontend/dist
+
+ENV PYTHONPATH=/app \
+    DATABASE_URL=sqlite+aiosqlite:////tmp/devstudio.db \
+    FRONTEND_DIST=/app/frontend/dist
+
+RUN useradd --create-home --shell /bin/bash appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=12s --retries=3 \
+    CMD curl -fsS http://localhost:8000/health || exit 1
 
-# Run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

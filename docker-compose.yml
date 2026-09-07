@@ -1,0 +1,28 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: fastapi_app/Dockerfile
+    container_name: tajik_fire
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-please}
+      DATABASE_URL: sqlite+aiosqlite:////tmp/devstudio.db
+      DEBUG: ${DEBUG:-false}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-["http://localhost:8000"]}
+      JUDGER_BACKEND: ${JUDGER_BACKEND:-subprocess}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@tajik-fire.io}
+      FRONTEND_DIST: /app/frontend/dist
+    volumes:
+      - ./frontend/src:/app/frontend/src:ro
+      - ./fastapi_app/app:/app/app:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

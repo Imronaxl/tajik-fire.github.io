@@ -1,21 +1,18 @@
 <!DOCTYPE html>
-<html lang="{{ current_language or 'en' }}" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="{% block meta_description %}Premium Developer Platform for Tasks, Learning & Collaboration{% endblock %}">
-  <meta name="theme-color" content="#09090b">
-  <title>{% block title %}DevStudio Pro{% endblock %}</title>
-  
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="{% block meta_description %}DevStudio Pro — a competitive programming platform with sandboxed judger, structured learning tracks and a social layer for developers.{% endblock %}">
+  <meta name="theme-color" content="#08090d">
+  <meta name="color-scheme" content="dark">
+  <title>{% block title %}DevStudio Pro — Competitive programming, learning & collaboration{% endblock %}</title>
+
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-  
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="/static/css/variables.css">
   <link rel="stylesheet" href="/static/css/base.css">
   <link rel="stylesheet" href="/static/css/utilities.css">
@@ -28,53 +25,108 @@
   <link rel="stylesheet" href="/static/css/components/navigation.css">
   {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-primary text-primary font-sans">
-  {% block body %}
-  
+<body>
   <nav class="navbar" role="navigation" aria-label="Main navigation">
-    <a href="/" class="navbar__brand">
-      <div class="navbar__logo">D</div>
-      <span class="navbar__brand-name">DevStudio</span>
-    </a>
-    
-    <div class="navbar__menu">
-      <a href="/olympiads" class="navbar__link">{{ _('Olympiads') }}</a>
-      <a href="/tasks" class="navbar__link">{{ _('Tasks') }}</a>
-      <a href="/messenger" class="navbar__link">{{ _('Messenger') }}</a>
-      <a href="/learning" class="navbar__link">{{ _('Learning') }}</a>
-    </div>
-    
-    <div class="navbar__actions">
-      {% if current_user %}
-      <a href="/profile" class="navbar__avatar-link" aria-label="Profile">
-        <img src="{{ current_user.avatar_url or '/static/avatars/default.png' }}" 
-             alt="{{ current_user.username }}" 
-             class="navbar__avatar"
-             loading="lazy">
+    <div class="navbar__inner">
+      <a href="/" class="navbar__brand">
+        <div class="navbar__logo">D</div>
+        <div class="navbar__brand-text">
+          <strong>DevStudio</strong>
+          <small>PRO</small>
+        </div>
       </a>
-      <button id="logout-btn" class="btn btn--secondary btn--sm">{{ _('Logout') }}</button>
-      {% else %}
-      <a href="/login" class="btn btn--secondary btn--sm">{{ _('Login') }}</a>
-      <a href="/register" class="btn btn--primary btn--sm">{{ _('Register') }}</a>
-      {% endif %}
+
+      <div class="navbar__menu" id="nav-menu">
+        <a href="/" class="navbar__link" data-route="/">Home</a>
+        <a href="/problems" class="navbar__link" data-route="/problems">Problems</a>
+        <a href="/olympiads" class="navbar__link" data-route="/olympiads">Contests</a>
+        <a href="/learning" class="navbar__link" data-route="/learning">Learning</a>
+        <a href="/leaderboard" class="navbar__link" data-route="/leaderboard">Leaderboard</a>
+        <a href="/messenger" class="navbar__link" data-route="/messenger" data-auth="logged-in">Messages</a>
+      </div>
+
+      <div class="navbar__actions">
+        <div class="navbar__search hide-mobile" data-auth="logged-in">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary);margin-right:6px">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" placeholder="Search problems, users..." id="global-search">
+          <kbd>/</kbd>
+        </div>
+
+        <div data-auth="logged-out">
+          <a href="/login" class="btn btn--ghost btn--sm">Sign in</a>
+          <a href="/register" class="btn btn--primary btn--sm">Get started</a>
+        </div>
+
+        <div class="navbar__user" data-auth="logged-in" style="display:none">
+          <div class="dropdown" id="user-dropdown">
+            <button class="btn btn--secondary btn--sm" id="dropdown-toggle" type="button" aria-haspopup="true">
+              <div class="avatar avatar--sm" id="nav-avatar">?</div>
+              <span id="nav-username" class="hide-mobile">account</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="dropdown__menu" role="menu">
+              <a href="/profile" class="dropdown__item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Profile
+              </a>
+              <a href="/tasks" class="dropdown__item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                Tasks
+              </a>
+              <a href="/submissions" class="dropdown__item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                Submissions
+              </a>
+              <div class="dropdown__divider"></div>
+              <button class="dropdown__item dropdown__item--danger" id="logout-btn" type="button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn--ghost btn--icon btn--sm navbar__mobile-toggle" id="nav-toggle" type="button" aria-label="Toggle menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+      </div>
     </div>
   </nav>
-  
-  
-  {% block sidebar %}{% endblock %}
-  
-  
-  <main class="main-content" role="main">
+
+  <main>
     {% block content %}{% endblock %}
   </main>
-  {% endblock %}
-  
-  
-  <script src="/static/js/i18n.js"></script>
-  <script src="/static/js/api.js"></script>
-  <script src="/static/js/utils/helpers.js"></script>
-  <script src="/static/js/components/toast.js"></script>
-  <script src="/static/js/app.js"></script>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <div class="navbar__logo" style="width:28px;height:28px;font-size:13px">D</div>
+          <div>
+            <strong>DevStudio Pro</strong>
+            <span>v{{ project_version }}</span>
+          </div>
+        </div>
+        <nav class="footer__nav">
+          <a href="/problems">Problems</a>
+          <a href="/olympiads">Contests</a>
+          <a href="/learning">Learning</a>
+          <a href="/leaderboard">Leaderboard</a>
+          <a href="/docs">API docs</a>
+        </nav>
+        <p class="footer__note">Built as a portfolio-grade full-stack project. Backend in FastAPI, frontend in vanilla ES modules, sandboxed judger for Python, C++ and Java.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+  <script type="module" src="/static/js/app.js"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

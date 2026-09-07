@@ -1,0 +1,156 @@
+.editor-page { padding: 0; max-width: none; }
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: calc(100vh - var(--navbar-height));
+  background: var(--bg-base);
+}
+
+.editor-aside {
+  border-right: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-aside__header {
+  padding: var(--space-5) var(--space-6) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.editor-aside__header h1 {
+  font-size: var(--text-xl);
+  letter-spacing: -0.015em;
+  margin-bottom: var(--space-2);
+}
+
+.editor-statement {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-6);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+.editor-statement h1,
+.editor-statement h2,
+.editor-statement h3 {
+  color: var(--text-primary);
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+.editor-statement h2 { font-size: var(--text-md); }
+.editor-statement h3 { font-size: var(--text-base); }
+.editor-statement p { margin-bottom: var(--space-3); }
+.editor-statement code { color: var(--accent); font-family: var(--font-mono); font-size: 0.92em; }
+.editor-statement pre { background: var(--bg-base); padding: var(--space-3); border-radius: var(--radius-md); margin: var(--space-3) 0; overflow-x: auto; }
+
+.editor-main {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-base);
+  overflow: hidden;
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.editor-lang-select {
+  width: 140px;
+  background: var(--bg-base);
+  padding: 6px 10px;
+  font-size: var(--text-sm);
+}
+
+.editor-code-wrap {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.editor-code {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: var(--space-5) var(--space-5) var(--space-5) calc(var(--space-5) + 36px);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+  tab-size: 4;
+  background-image:
+    linear-gradient(to right, var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px);
+  background-size: 100% 22px;
+  background-position: left 0 top 4px;
+}
+
+.editor-code::before { content: ''; }
+
+.editor-results {
+  max-height: 240px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.verdict-card {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  animation: fade-in var(--transition-base);
+}
+.verdict-card:last-child { border-bottom: none; }
+
+.verdict-card__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.verdict-card--accepted .verdict-card__icon { background: var(--success-soft); color: var(--success); }
+.verdict-card--wrong_answer .verdict-card__icon { background: var(--danger-soft); color: var(--danger); }
+.verdict-card--pending .verdict-card__icon { background: var(--accent-soft); color: var(--accent); }
+.verdict-card--error .verdict-card__icon { background: var(--warning-soft); color: var(--warning); }
+
+.verdict-card__main { flex: 1; min-width: 0; }
+.verdict-card__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.verdict-card__meta {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+.verdict-card__error {
+  font-size: var(--text-xs);
+  color: var(--danger);
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  white-space: pre-wrap;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+@media (max-width: 920px) {
+  .editor-layout { grid-template-columns: 1fr; height: auto; }
+  .editor-aside { max-height: 50vh; }
+  .editor-main { min-height: 60vh; }
+}

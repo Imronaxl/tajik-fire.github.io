@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Contests & Olympiads · DevStudio Pro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/olympiads.css">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+  <header class="page-header">
+    <h1>Contests</h1>
+    <p>Live and upcoming competitive programming contests. Join a contest to test your speed and accuracy.</p>
+  </header>
+
+  <div id="contests-container">
+    <div class="empty-state">
+      <div class="spinner"></div>
+      <p>Loading contests…</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="/static/js/pages/olympiads.js"></script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Editor · DevStudio Pro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/editor.css">
+{% endblock %}
+
+{% block content %}
+<div class="page editor-page">
+  <div class="editor-layout">
+    <aside class="editor-aside">
+      <div class="editor-aside__header">
+        <a href="/problems" class="text-xs text-tertiary flex items-center gap-2 mb-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Back to problems
+        </a>
+        <h1 id="editor-title">—</h1>
+        <div class="flex items-center gap-2 mt-2 flex-wrap">
+          <span id="editor-difficulty"></span>
+          <span class="badge" id="editor-category">—</span>
+          <span class="text-xs text-tertiary" id="editor-meta">—</span>
+        </div>
+      </div>
+      <div class="editor-statement" id="editor-statement">
+        <div class="empty-state"><div class="spinner"></div></div>
+      </div>
+    </aside>
+
+    <section class="editor-main">
+      <header class="editor-toolbar">
+        <div class="editor-tabs">
+          <select class="select editor-lang-select" id="editor-lang">
+            <option value="python3">Python 3</option>
+            <option value="cpp17">C++ 17</option>
+            <option value="java11">Java 11</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn btn--ghost btn--sm" id="editor-reset" type="button">Reset</button>
+          <button class="btn btn--primary btn--sm" id="editor-submit" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Submit
+          </button>
+        </div>
+      </header>
+      <div class="editor-code-wrap">
+        <textarea class="editor-code" id="editor-code" spellcheck="false" autocomplete="off"></textarea>
+      </div>
+      <div class="editor-results" id="editor-results">
+        <div class="empty-state">
+          <p class="text-xs text-tertiary">Submit your code to see the verdict.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="/static/js/pages/editor.js"></script>
+{% endblock %}
