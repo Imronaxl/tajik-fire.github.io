@@ -4,6 +4,7 @@
   import api from '../../lib/api.js';
   import { user } from '../../lib/auth.js';
   import { escapeHtml, initials, relativeTime, verdictClass, verdictLabel, languageLabel } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   let stats = { total_users: 0, total_problems: 0, total_submissions: 0, accepted_rate: 0 };
   let feed = [];
@@ -54,28 +55,24 @@ public class Main {
   <div class="container">
     <div class="hero__inner">
       <div>
-        <span class="hero__tag">v1.0 · стабильный релиз</span>
-        <h1>Пиши код.<br />Получай вердикт.<br /><span class="accent">Поднимайся в рейтинге.</span></h1>
-        <p class="hero__sub">
-          Платформа для соревновательного программирования с песочницей-судьёй
-          для Python, C++ и Java, структурированными учебными треками и
-          социальной лентой — всё в одном рабочем пространстве.
-        </p>
+        <span class="hero__tag">{$t('home.hero.tag')}</span>
+        <h1>{$t('home.hero.title1')}<br />{$t('home.hero.title2')}<br /><span class="accent">{$t('home.hero.title3')}</span></h1>
+        <p class="hero__sub">{$t('home.hero.subtitle')}</p>
         <div class="hero__actions">
           <button class="btn btn--primary btn--lg" on:click={() => push($user ? '/problems' : '/register')}>
-            Начать решать
+            {$t('home.hero.cta.start')}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
           </button>
-          <button class="btn btn--secondary btn--lg" on:click={() => push('/problems')}>Смотреть задачи</button>
+          <button class="btn btn--secondary btn--lg" on:click={() => push('/problems')}>{$t('home.hero.cta.browse')}</button>
         </div>
         <div class="hero__meta">
-          <div class="hero__meta-item"><strong>{stats.total_problems}</strong><small>Задач</small></div>
-          <div class="hero__meta-item"><strong>{stats.total_users}</strong><small>Разработчиков</small></div>
-          <div class="hero__meta-item"><strong>{stats.total_submissions}</strong><small>Сабмитов</small></div>
-          <div class="hero__meta-item"><strong>{stats.accepted_rate}%</strong><small>Acceptance</small></div>
+          <div class="hero__meta-item"><strong>{stats.total_problems}</strong><small>{$t('home.hero.stats.problems')}</small></div>
+          <div class="hero__meta-item"><strong>{stats.total_users}</strong><small>{$t('home.hero.stats.users')}</small></div>
+          <div class="hero__meta-item"><strong>{stats.total_submissions}</strong><small>{$t('home.hero.stats.submissions')}</small></div>
+          <div class="hero__meta-item"><strong>{stats.accepted_rate}%</strong><small>{$t('home.hero.stats.acceptance')}</small></div>
         </div>
       </div>
 
@@ -92,7 +89,7 @@ public class Main {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          Verdict: <strong>Accepted</strong> · 4 / 4 tests · 28&nbsp;мс · 8&nbsp;МБ
+          {$t('verdict.accepted')} · 4 / 4 тестҳо · 28&nbsp;мс · 8&nbsp;МБ
         </div>
       </div>
     </div>
@@ -102,8 +99,8 @@ public class Main {
 <section class="container" style="margin-bottom: var(--sp-12);">
   <div class="section-header">
     <div>
-      <h2>Всё, что нужно для роста</h2>
-      <p>От первой задачи A + B до продвинутой алгоритмической подготовки.</p>
+      <h2>{$t('home.features.title')}</h2>
+      <p>{$t('home.features.subtitle')}</p>
     </div>
   </div>
   <div class="grid grid--3">
@@ -111,43 +108,43 @@ public class Main {
       <div class="feature-card__icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
       </div>
-      <h3>Песочница-судья</h3>
-      <p>Сабмить Python, C++17 или Java11. Каждое решение запускается в изолированном процессе с лимитами по памяти и времени.</p>
+      <h3>{$t('home.features.judger.title')}</h3>
+      <p>{$t('home.features.judger.desc')}</p>
     </div>
     <div class="feature-card feature-card--purple">
       <div class="feature-card__icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
       </div>
-      <h3>Учебные треки</h3>
-      <p>Короткие модули с теорией и graded-задачами. Следи за прогрессом и зарабатывай рейтинговые очки за каждую Accepted.</p>
+      <h3>{$t('home.features.learning.title')}</h3>
+      <p>{$t('home.features.learning.desc')}</p>
     </div>
     <div class="feature-card feature-card--teal">
       <div class="feature-card__icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
       </div>
-      <h3>Социальный слой</h3>
-      <p>Заявки в друзья, личные и групповые чаты, публичная лента сабмитов и глобальный рейтинг. Расти вместе с другими.</p>
+      <h3>{$t('home.features.social.title')}</h3>
+      <p>{$t('home.features.social.desc')}</p>
     </div>
     <div class="feature-card feature-card--warn">
       <div class="feature-card__icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
       </div>
-      <h3>Система рейтинга</h3>
-      <p>Easy +5, medium +12, hard +25 очков за первое решение. Топ-3 разработчиков попадают на подиум лидерборда.</p>
+      <h3>{$t('home.features.rating.title')}</h3>
+      <p>{$t('home.features.rating.desc')}</p>
     </div>
     <div class="feature-card">
       <div class="feature-card__icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path></svg>
       </div>
-      <h3>Личные задачи</h3>
-      <p>Канбан-доска: to-do, in-progress, done. Приоритеты и статусы помогают держать учебный план в фокусе.</p>
+      <h3>{$t('home.features.tasks.title')}</h3>
+      <p>{$t('home.features.tasks.desc')}</p>
     </div>
     <div class="feature-card feature-card--purple">
       <div class="feature-card__icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
       </div>
-      <h3>Три языка</h3>
-      <p>Условия задач переведены на английский, русский и таджикский. Меняй язык на любой странице — прогресс сохраняется.</p>
+      <h3>{$t('home.features.i18n.title')}</h3>
+      <p>{$t('home.features.i18n.desc')}</p>
     </div>
   </div>
 </section>
@@ -155,16 +152,16 @@ public class Main {
 <section class="container" style="margin-bottom: var(--sp-16);">
   <div class="section-header">
     <div>
-      <h2>Лента сабмитов</h2>
-      <p>Последние вердикты со всей платформы в реальном времени.</p>
+      <h2>{$t('home.feed.title')}</h2>
+      <p>{$t('home.feed.subtitle')}</p>
     </div>
-    <button class="btn btn--ghost btn--sm" on:click={() => push('/submissions')}>Все сабмиты →</button>
+    <button class="btn btn--ghost btn--sm" on:click={() => push('/submissions')}>{$t('home.feed.viewAll')} →</button>
   </div>
   <div class="feed-list">
     {#if feed.length === 0}
       <div class="empty-state">
         <div class="spinner"></div>
-        <p>Загрузка ленты…</p>
+        <p>{$t('common.loading')}</p>
       </div>
     {:else}
       {#each feed as entry}
@@ -181,7 +178,7 @@ public class Main {
             <span>{languageLabel(entry.language)}</span>
           </div>
           <div class="feed-row__meta">
-            <span class={verdictClass(entry.verdict)}>{verdictLabel(entry.verdict)}</span>
+            <span class={verdictClass(entry.verdict)}>{verdictLabel(entry.verdict, $t)}</span>
             {#if entry.execution_time}<span>{entry.execution_time}s</span>{/if}
           </div>
         </a>
@@ -203,7 +200,7 @@ public class Main {
   .hero__inner {
     display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--sp-12); align-items: center;
   }
-  .hero__tagline {
+  .hero__tag {
     display: inline-flex; align-items: center; gap: var(--sp-2);
     padding: 4px 12px; background: var(--brand-soft);
     border: 1px solid rgba(91, 140, 255, 0.25); border-radius: var(--r-full);

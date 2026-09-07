@@ -295,7 +295,6 @@ async def _judge_in_background(submission_id: int) -> None:
             import logging
             logging.getLogger(__name__).warning("judging %s failed: %s", submission_id, exc)
 
-
 @router.get("/submissions/{submission_id}", response_model=SubmissionResponse)
 async def get_submission(
     submission_id: int,

@@ -5,6 +5,7 @@
   import { user, updateProfile, changePassword } from '../../lib/auth.js';
   import { toasts } from '../../lib/toast.js';
   import { initials, relativeTime, verdictClass, verdictLabel, languageLabel } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   let stats = null;
   let submissions = [];
@@ -14,7 +15,7 @@
 
   onMount(async () => {
     if (!$user) {
-      toasts.warning('Войдите, чтобы открыть профиль.');
+      toasts.warning($t('toast.loginRequired'));
       setTimeout(() => push('/login?next=/profile'), 800);
       return;
     }
@@ -32,7 +33,7 @@
         first_name: editForm.first_name || null,
         last_name: editForm.last_name || null,
       });
-      toasts.success('Профиль обновлён');
+      toasts.success($t('profile.toast.updated'));
       showEdit = false;
     } catch (err) { toasts.error(err.message); }
   }
@@ -40,7 +41,7 @@
   async function changePwd() {
     try {
       await changePassword(pwdForm.old_password, pwdForm.new_password);
-      toasts.success('Пароль обновлён');
+      toasts.success($t('profile.toast.passwordUpdated'));
       pwdForm = { old_password: '', new_password: '' };
     } catch (err) { toasts.error(err.message); }
   }
@@ -53,55 +54,55 @@
       <div class="profile-header__info">
         <div class="flex items-center gap-2 flex-wrap mb-2">
           <h1>{$user.username}</h1>
-          <span class="badge badge--brand">{$user.rating || 0} рейтинг</span>
+          <span class="badge badge--brand">{$user.rating || 0} {$t('leaderboard.points')}</span>
         </div>
         <p class="text-2">{$user.first_name} {$user.last_name}</p>
-        <p class="text-3 text-sm mt-2">С нами с {new Date($user.created_at).toLocaleDateString('ru-RU')}</p>
+        <p class="text-3 text-sm mt-2">{$t('profile.joined', { date: new Date($user.created_at).toLocaleDateString('ru-RU') })}</p>
       </div>
       <div class="profile-header__actions">
-        <button class="btn btn--secondary btn--sm" on:click={() => (showEdit = true)}>Редактировать</button>
+        <button class="btn btn--secondary btn--sm" on:click={() => (showEdit = true)}>{$t('profile.edit')}</button>
       </div>
     </div>
 
     <div class="grid grid--4 mb-8">
       <div class="stat-card">
-        <div class="stat-card__label">Решено</div>
+        <div class="stat-card__label">{$t('profile.stat.solved')}</div>
         <div class="stat-card__value">{stats?.solved_count ?? $user.solved_count}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card__label">Сабмитов</div>
+        <div class="stat-card__label">{$t('profile.stat.submissions')}</div>
         <div class="stat-card__value">{stats?.submissions_count ?? 0}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card__label">Accepted</div>
+        <div class="stat-card__label">{$t('profile.stat.accepted')}</div>
         <div class="stat-card__value">{stats?.accepted_count ?? 0}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card__label">Успешность</div>
+        <div class="stat-card__label">{$t('profile.stat.successRate')}</div>
         <div class="stat-card__value">{(stats?.success_rate ?? 0).toFixed(0)}%</div>
       </div>
     </div>
 
     <div class="grid grid--2">
       <div>
-        <div class="section-header"><h2>Последние сабмиты</h2></div>
+        <div class="section-header"><h2>{$t('profile.recent')}</h2></div>
         <div class="feed-list">
           {#if submissions.length === 0}
             <div class="empty-state">
-              <h3>Сабмитов пока нет</h3>
-              <p>Здесь появятся ваши последние попытки.</p>
-              <button class="btn btn--primary btn--sm mt-4" on:click={() => push('/problems')}>Решить задачу</button>
+              <h3>{$t('profile.recent.empty')}</h3>
+              <p>{$t('profile.recent.empty.desc')}</p>
+              <button class="btn btn--primary btn--sm mt-4" on:click={() => push('/problems')}>{$t('profile.btn.solveProblem')}</button>
             </div>
           {:else}
             {#each submissions as s}
               <a class="feed-row" href={`/problems/${s.problem_id}`} on:click|preventDefault={() => push(`/problems/${s.problem_id}`)}>
                 <div class="feed-row__user"><span class="lang-badge">{languageLabel(s.language)}</span></div>
                 <div class="feed-row__main">
-                  <strong>Сабмит #{s.id}</strong>
-                  <span>Задача #{s.problem_id}</span>
+                  <strong>{$t('submissions.title')} #{s.id}</strong>
+                  <span>{$t('problems.title')} #{s.problem_id}</span>
                 </div>
                 <div class="feed-row__meta">
-                  <span class={verdictClass(s.verdict)}>{verdictLabel(s.verdict)}</span>
+                  <span class={verdictClass(s.verdict)}>{verdictLabel(s.verdict, $t)}</span>
                   <span>{relativeTime(new Date(s.created_at))}</span>
                 </div>
               </a>
@@ -110,20 +111,20 @@
         </div>
       </div>
       <div>
-        <div class="section-header"><h2>Настройки аккаунта</h2></div>
+        <div class="section-header"><h2>{$t('profile.settings')}</h2></div>
         <div class="card">
           <div class="card__body">
             <form on:submit|preventDefault={changePwd}>
               <div class="field">
-                <label class="field-label" for="cp-old">Текущий пароль</label>
+                <label class="field-label" for="cp-old">{$t('profile.field.oldPassword')}</label>
                 <input class="input" id="cp-old" type="password" bind:value={pwdForm.old_password} required>
               </div>
               <div class="field">
-                <label class="field-label" for="cp-new">Новый пароль</label>
+                <label class="field-label" for="cp-new">{$t('profile.field.newPassword')}</label>
                 <input class="input" id="cp-new" type="password" bind:value={pwdForm.new_password} required>
-                <p class="field-hint">Минимум 8 символов, с заглавной, строчной и цифрой.</p>
+                <p class="field-hint">{$t('auth.hint.password')}</p>
               </div>
-              <button type="submit" class="btn btn--primary btn--block">Обновить пароль</button>
+              <button type="submit" class="btn btn--primary btn--block">{$t('profile.btnUpdatePassword')}</button>
             </form>
           </div>
         </div>
@@ -137,21 +138,21 @@
     <div class="modal__overlay" on:click={() => (showEdit = false)} role="presentation"></div>
     <div class="modal__content modal__content--sm">
       <header class="modal__header">
-        <h2 class="modal__title">Редактировать профиль</h2>
-        <button class="modal__close" on:click={() => (showEdit = false)} aria-label="Закрыть">×</button>
+        <h2 class="modal__title">{$t('profile.modal.editTitle')}</h2>
+        <button class="modal__close" on:click={() => (showEdit = false)} aria-label={$t('common.close')}>×</button>
       </header>
       <div class="modal__body">
         <div class="field-row">
           <div class="field">
-            <label class="field-label" for="edit-first">Имя</label>
+            <label class="field-label" for="edit-first">{$t('auth.field.firstName')}</label>
             <input class="input" id="edit-first" bind:value={editForm.first_name} type="text">
           </div>
           <div class="field">
-            <label class="field-label" for="edit-last">Фамилия</label>
+            <label class="field-label" for="edit-last">{$t('auth.field.lastName')}</label>
             <input class="input" id="edit-last" bind:value={editForm.last_name} type="text">
           </div>
         </div>
-        <button class="btn btn--primary btn--block" on:click={saveProfile}>Сохранить</button>
+        <button class="btn btn--primary btn--block" on:click={saveProfile}>{$t('profile.btnSave')}</button>
       </div>
     </div>
   </div>

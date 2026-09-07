@@ -5,6 +5,7 @@
   import { user } from '../../lib/auth.js';
   import { toasts } from '../../lib/toast.js';
   import { renderMarkdown, difficultyClass } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   export let params;
 
@@ -13,24 +14,27 @@
 
   onMount(async () => {
     if (!$user) {
-      toasts.warning('Войдите, чтобы открыть модуль.');
+      toasts.warning($t('toast.loginRequired'));
       setTimeout(() => push(`/login?next=/learning/${params.slug}`), 800);
       return;
     }
     try {
       module = await api.get(`/learning/modules/${params.slug}`);
-    } catch (err) { toasts.error(err.message); }
-    finally { loading = false; }
+    } catch (err) {
+      toasts.error($t('learning.notFound'));
+    } finally {
+      loading = false;
+    }
   });
 </script>
 
 <div class="page">
   <a href="/learning" class="back" on:click|preventDefault={() => push('/learning')}>
-    ← К модулям
+    ← {$t('learning.backToModules')}
   </a>
 
   {#if loading}
-    <div class="empty-state"><div class="spinner"></div><p>Загрузка модуля…</p></div>
+    <div class="empty-state"><div class="spinner"></div><p>{$t('common.loading')}</p></div>
   {:else if module}
     <header class="header">
       <h1>{module.title}</h1>
@@ -39,18 +43,20 @@
 
     <div class="layout">
       <div class="theory">
-        {@html renderMarkdown(module.theory_content || 'Теория пока не опубликована.')}
+        {@html renderMarkdown(module.theory_content || $t('learning.theory'))}
       </div>
       <aside class="problems">
-        <h3>Практические задачи</h3>
+        <h3>{$t('learning.problems')}</h3>
         {#if (module.problems || []).length === 0}
-          <p class="text-3 text-sm">К модулю пока не привязаны задачи.</p>
+          <p class="text-3 text-sm">{$t('learning.noProblems')}</p>
         {:else}
           {#each module.problems as p}
             <a class="problem-row" href={`/problems/${p.id}`} on:click|preventDefault={() => push(`/problems/${p.id}`)}>
               <span class="problem-row__order">{String(p.order).padStart(2, '0')}</span>
               <span class="problem-row__title">{p.title}</span>
-              <span class={difficultyClass(p.difficulty)}>{p.difficulty}</span>
+              <span class={difficultyClass(p.difficulty)}>
+                {p.difficulty === 'easy' ? $t('problems.diff.easy') : p.difficulty === 'medium' ? $t('problems.diff.medium') : $t('problems.diff.hard')}
+              </span>
             </a>
           {/each}
         {/if}

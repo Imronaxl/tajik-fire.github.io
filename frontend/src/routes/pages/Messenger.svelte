@@ -5,6 +5,7 @@
   import { toasts } from '../../lib/toast.js';
   import { initials, formatDate } from '../../lib/utils.js';
   import { push } from '../../lib/router.js';
+  import { t } from '../../core/i18n/index.js';
 
   let chats = [];
   let activeChat = null;
@@ -14,7 +15,7 @@
 
   onMount(async () => {
     if (!$user) {
-      toasts.warning('Войдите, чтобы открыть мессенджер.');
+      toasts.warning($t('toast.loginRequired'));
       setTimeout(() => push(`/login?next=/messenger`), 800);
       return;
     }
@@ -56,7 +57,10 @@
 
   async function send() {
     const text = draft.trim();
-    if (!text || !activeChat) return;
+    if (!text || !activeChat) {
+      if (!text) toasts.warning($t('messenger.toast.empty'));
+      return;
+    }
     draft = '';
     try {
       await api.post('/messenger/messages', { chat_id: activeChat, content: text });
@@ -65,14 +69,14 @@
   }
 
   async function newChat() {
-    const query = prompt('Найти пользователя для нового чата:');
+    const query = prompt($t('messenger.prompt.search'));
     if (!query) return;
     try {
       const users = await api.get('/users/search', { q: query });
-      if (users.length === 0) return toasts.warning('Никого не нашли.');
+      if (users.length === 0) return toasts.warning($t('messenger.noMatch'));
       const friend = users[0];
       await api.post('/messenger/chats', { is_group: false, member_ids: [friend.id] });
-      toasts.success(`Чат с ${friend.username} создан`);
+      toasts.success($t('messenger.toast.created', { name: friend.username }));
       await loadChats();
     } catch (err) { toasts.error(err.message); }
   }
@@ -87,25 +91,25 @@
 <div class="messenger">
   <aside class="sidebar">
     <header>
-      <h2>Сообщения</h2>
-      <button class="btn btn--secondary btn--icon btn--sm" on:click={newChat} title="Новый чат">
+      <h2>{$t('messenger.title')}</h2>
+      <button class="btn btn--secondary btn--icon btn--sm" on:click={newChat} title={$t('messenger.btn.new')} aria-label={$t('messenger.btn.new')}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
       </button>
     </header>
     <div class="chats-list">
       {#if chats.length === 0}
         <div class="empty-state" style="padding: var(--sp-8);">
-          <h3>Нет чатов</h3>
-          <p class="text-xs">Начните новый разговор.</p>
+          <h3>{$t('messenger.empty.chats')}</h3>
+          <p class="text-xs">{$t('messenger.empty.chats.desc')}</p>
         </div>
       {:else}
         {#each chats as c}
           {@const p = peer(c)}
-          <div class="chat-item" class:active={activeChat === c.id} on:click={() => openChat(c.id)}>
+          <div class="chat-item" class:active={activeChat === c.id} on:click={() => openChat(c.id)} role="button" tabindex="0" aria-label={c.name || p.username}>
             <div class="avatar avatar--sm avatar--gradient">{initials(p.username || '?')}</div>
             <div class="chat-item__main">
-              <div class="chat-item__name">{c.name || p.username || 'Группа'}</div>
-              <div class="chat-item__preview">{c.last_message?.content?.slice(0, 40) || 'Нет сообщений'}</div>
+              <div class="chat-item__name">{c.name || p.username || $t('messenger.group.default')}</div>
+              <div class="chat-item__preview">{c.last_message?.content?.slice(0, 40) || $t('messenger.noMessages')}</div>
             </div>
             {#if c.unread_count > 0}<span class="unread">{c.unread_count}</span>{/if}
           </div>
@@ -118,8 +122,8 @@
     {#if !activeChat}
       <div class="placeholder">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <h3>Выберите чат</h3>
-        <p>Откройте беседу из списка слева.</p>
+        <h3>{$t('messenger.placeholder')}</h3>
+        <p>{$t('messenger.placeholder.desc')}</p>
       </div>
     {:else}
       {@const c = chats.find((x) => x.id === activeChat) || {}}
@@ -127,8 +131,8 @@
       <header>
         <div class="avatar avatar--sm avatar--gradient">{initials(p.username || '?')}</div>
         <div>
-          <div class="name">{c.name || p.username || 'Группа'}</div>
-          <div class="status text-xs text-3">Личные сообщения</div>
+          <div class="name">{c.name || p.username || $t('messenger.group.default')}</div>
+          <div class="status text-xs text-3">{$t('messenger.direct')}</div>
         </div>
       </header>
       <div class="messages">
@@ -140,8 +144,8 @@
         {/each}
       </div>
       <form class="input-bar" on:submit|preventDefault={send}>
-        <input class="input" bind:value={draft} placeholder="Напишите сообщение…" autocomplete="off">
-        <button class="btn btn--primary btn--icon" type="submit">
+        <input class="input" bind:value={draft} placeholder={$t('messenger.input')} autocomplete="off">
+        <button class="btn btn--primary btn--icon" type="submit" aria-label={$t('messenger.send')}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         </button>
       </form>
