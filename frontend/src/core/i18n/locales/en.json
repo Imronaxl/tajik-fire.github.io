@@ -1,0 +1,55 @@
+{
+  "nav.home": "Home",
+  "nav.problems": "Problems",
+  "nav.contests": "Contests",
+  "nav.learning": "Learning",
+  "nav.leaderboard": "Leaderboard",
+  "nav.messenger": "Messages",
+  "nav.profile": "Profile",
+  "nav.tasks": "Tasks",
+  "nav.submissions": "Submissions",
+  "nav.news": "News",
+  "nav.signin": "Sign in",
+  "nav.signup": "Get started",
+  "nav.signout": "Sign out",
+  "nav.search": "Search...",
+
+  "brand.name": "tajik-fire",
+  "brand.tagline": "Competitive programming platform",
+
+  "home.hero.title1": "Write code.",
+  "home.hero.title2": "Get verdict.",
+  "home.hero.title3": "Climb the ranks.",
+  "home.hero.cta.start": "Start solving",
+  "home.hero.cta.browse": "Browse problems",
+
+  "auth.welcome.title": "Welcome back.",
+  "auth.tab.login": "Sign in",
+  "auth.tab.register": "Register",
+  "auth.tab.reset": "Reset password",
+
+  "common.loading": "Loading...",
+  "common.save": "Save",
+  "common.cancel": "Cancel",
+  "common.delete": "Delete",
+  "common.edit": "Edit",
+  "common.close": "Close",
+
+  "verdict.accepted": "Accepted",
+  "verdict.wrongAnswer": "Wrong answer",
+  "verdict.tle": "TLE",
+  "verdict.mle": "MLE",
+  "verdict.runtimeError": "Runtime error",
+  "verdict.compileError": "Compilation error",
+  "verdict.pending": "Pending",
+  "verdict.judging": "Judging",
+
+  "language.toggle": "Language",
+  "language.tg": "Тоҷикӣ",
+  "language.ru": "Русский",
+  "language.en": "English",
+
+  "ai.title": "AI Assistant",
+  "ai.btn": "AI",
+  "ai.comingSoon": "AI Assistant will be available soon."
+}

@@ -69,6 +69,13 @@ app.include_router(friends.router, prefix=f"{api_prefix}/friends", tags=["Friend
 app.include_router(admin.router, prefix=f"{api_prefix}/admin", tags=["Admin"])
 app.include_router(stats.router, prefix=f"{api_prefix}", tags=["Stats"])
 
+from app.modules import ai_assistant as ai_module
+ai_module.register()
+from app.modules.registry import list_modules, get_all_routers
+for router_instance, prefix, tags in get_all_routers():
+    app.include_router(router_instance, prefix=prefix, tags=tags)
+logger.info("registered modules: %s", [m.name for m in list_modules()])
+
 if FRONTEND_EXISTS:
     assets_dir = os.path.join(FRONTEND_DIST, "assets")
     if os.path.isdir(assets_dir):

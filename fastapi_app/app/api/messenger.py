@@ -87,7 +87,7 @@ async def create_chat(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    member_ids = list({(payload.member_ids or []) + [current_user.id]})
+    member_ids = list({*payload.member_ids, current_user.id})
     if not payload.is_group and len(member_ids) != 2:
         raise HTTPException(status_code=400, detail="direct chat requires exactly one other member")
 

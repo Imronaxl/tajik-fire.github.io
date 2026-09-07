@@ -1,5 +1,6 @@
 <script>
   import { version } from '../stores.js';
+  import { t } from '../../core/i18n/index.js';
 </script>
 
 <footer class="footer">
@@ -13,13 +14,13 @@
         </div>
       </div>
       <nav class="footer__nav">
-        <a href="/problems">Задачи</a>
-        <a href="/olympiads">Контесты</a>
-        <a href="/learning">Обучение</a>
-        <a href="/leaderboard">Рейтинг</a>
+        <a href="/problems">{$t('nav.problems')}</a>
+        <a href="/olympiads">{$t('nav.contests')}</a>
+        <a href="/learning">{$t('nav.learning')}</a>
+        <a href="/leaderboard">{$t('nav.leaderboard')}</a>
         <a href="/docs" target="_blank">API</a>
       </nav>
-      <p class="footer__note">Портфолио-проект на FastAPI + Svelte. Песочница для Python, C++ и Java, учебные треки и социальная лента.</p>
+      <p class="footer__note">{$t('footer.tagline')}</p>
     </div>
   </div>
 </footer>
