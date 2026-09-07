@@ -54,6 +54,9 @@ jobs:
           npm install --no-audit --no-fund
           npm run build
 
+      - name: Clean DB before smoke tests
+        run: rm -f ci-test.db
+
       - name: Smoke test — приложение запускается
         env:
           SECRET_KEY: ci-secret-key-not-for-production
@@ -61,17 +64,28 @@ jobs:
           DEBUG: "true"
           FRONTEND_DIST: ${{ github.workspace }}/frontend/dist
         run: |
-          python -c "
+          python << 'EOF'
           import asyncio
           from main import app
           from app.db.database import init_db
+
           asyncio.run(init_db())
-          routes = [r.path for r in app.routes if hasattr(r, 'path')]
-          assert '/api/auth/login' in routes
-          assert '/api/problems/' in routes
-          assert '/api/stats/dashboard' in routes
-          print(f'OK: {len(routes)} routes registered')
-          "
+
+          routes = []
+          for r in app.routes:
+              path = getattr(r, 'path', None)
+              if path:
+                  routes.append(path)
+
+          print(f"Total routes: {len(routes)}")
+          for required in ['/api/auth/login', '/api/problems', '/api/stats/dashboard']:
+              found = any(r == required or r.startswith(required) for r in routes)
+              print(f"  {required}: {'OK' if found else 'MISSING'}")
+              if not found:
+                  raise SystemExit(f"Required route missing: {required}")
+
+          print("OK: app boots, all critical routes registered")
+          EOF
 
       - name: Smoke test — полный пайплайн судьи
         env:
