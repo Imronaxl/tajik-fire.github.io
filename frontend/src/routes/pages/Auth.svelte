@@ -3,6 +3,7 @@
   import { push } from '../../lib/router.js';
   import { login, register, confirmEmail, resendCode, requestPasswordReset, resetPassword } from '../../lib/auth.js';
   import { toasts } from '../../lib/toast.js';
+  import { t } from '../../core/i18n/index.js';
 
   let tab = 'login';
   let pendingEmail = '';
@@ -26,7 +27,7 @@
     loading = true;
     try {
       const u = await login(form.login);
-      toasts.success(`С возвращением, ${u.username}!`);
+      toasts.success($t('auth.toast.welcome', { name: u.username }));
       const next = new URLSearchParams(location.search).get('next') || '/problems';
       push(next);
     } catch (err) { toasts.error(err.message); }
@@ -38,8 +39,8 @@
     try {
       const result = await register(form.register);
       lastRegistrationEmail = form.register.email;
-      if (result?.code) toasts.info(`Dev-режим: ваш код подтверждения — ${result.code}`, { duration: 8000 });
-      else toasts.success('Аккаунт создан. Проверьте почту — мы выслали 6-значный код.');
+      if (result?.code) toasts.info($t('auth.toast.devCode', { code: result.code }), { duration: 8000 });
+      else toasts.success($t('auth.toast.registered'));
       tab = 'verify';
     } catch (err) { toasts.error(err.message); }
     finally { loading = false; }
@@ -50,8 +51,8 @@
     try {
       pendingEmail = form.reset.email;
       const result = await requestPasswordReset(form.reset.email);
-      if (result?.code) toasts.info(`Dev-режим: ваш код сброса — ${result.code}`, { duration: 8000 });
-      else toasts.success('Если почта существует — код отправлен.');
+      if (result?.code) toasts.info($t('auth.toast.devCode', { code: result.code }), { duration: 8000 });
+      else toasts.success($t('auth.toast.codeSent'));
       tab = 'resetConfirm';
     } catch (err) { toasts.error(err.message); }
     finally { loading = false; }
@@ -61,7 +62,7 @@
     loading = true;
     try {
       await resetPassword(pendingEmail, form.resetConfirm.code, form.resetConfirm.new_password);
-      toasts.success('Пароль сброшен. Можете войти.');
+      toasts.success($t('auth.toast.reset'));
       setTimeout(() => (tab = 'login'), 600);
     } catch (err) { toasts.error(err.message); }
     finally { loading = false; }
@@ -71,23 +72,23 @@
     loading = true;
     try {
       await confirmEmail(lastRegistrationEmail, form.verify.code);
-      toasts.success('Email подтверждён. Перенаправляем…');
+      toasts.success($t('auth.toast.verified'));
       setTimeout(() => push('/login'), 800);
     } catch (err) { toasts.error(err.message); }
     finally { loading = false; }
   }
 
   async function doResend() {
-    if (!lastRegistrationEmail) return toasts.warning('Сначала зарегистрируйтесь.');
+    if (!lastRegistrationEmail) return toasts.warning($t('common.tryAgain'));
     const r = await resendCode(lastRegistrationEmail);
-    if (r?.code) toasts.info(`Dev-режим: ваш код — ${r.code}`, { duration: 8000 });
-    else toasts.success('Код отправлен повторно.');
+    if (r?.code) toasts.info($t('auth.toast.devCode', { code: r.code }), { duration: 8000 });
+    else toasts.success($t('auth.toast.codeResent'));
   }
 
   const tabs = [
-    { id: 'login', label: 'Вход' },
-    { id: 'register', label: 'Регистрация' },
-    { id: 'reset', label: 'Сброс пароля' },
+    { id: 'login', label: $t('auth.tab.login') },
+    { id: 'register', label: $t('auth.tab.register') },
+    { id: 'reset', label: $t('auth.tab.reset') },
   ];
 </script>
 
@@ -95,19 +96,19 @@
   <div class="auth__card">
     <aside class="auth__aside">
       <div class="brand__logo" style="width:36px;height:36px;font-size:18px">T</div>
-      <h2>С возвращением.</h2>
-      <p>Войдите в аккаунт, чтобы продолжить решать задачи, отслеживать прогресс и подниматься в рейтинге.</p>
+      <h2>{$t('auth.welcome.title')}</h2>
+      <p>{$t('auth.welcome.subtitle')}</p>
       <div class="auth__demo">
-        <span class="badge badge--brand">Демо-аккаунт</span>
-        <code>demo / Demo1234</code>
+        <span class="badge badge--brand">{$t('auth.demo.label')}</span>
+        <code>{$t('auth.demo.hint')}</code>
       </div>
     </aside>
 
     <div class="auth__form-wrap">
       {#if tab !== 'verify' && tab !== 'resetConfirm'}
         <div class="auth__tabs">
-          {#each tabs as t}
-            <button class="auth-tab" class:active={tab === t.id} on:click={() => (tab = t.id)}>{t.label}</button>
+          {#each tabs as tb}
+            <button class="auth-tab" class:active={tab === tb.id} on:click={() => (tab = tb.id)}>{tb.label}</button>
           {/each}
         </div>
       {/if}
@@ -115,82 +116,82 @@
       {#if tab === 'login'}
         <form class="auth-form" on:submit|preventDefault={submitLogin}>
           <div class="field">
-            <label class="field-label" for="login-username">Логин или email</label>
+            <label class="field-label" for="login-username">{$t('auth.field.login')}</label>
             <input class="input" id="login-username" bind:value={form.login.login} type="text" autocomplete="username" required>
           </div>
           <div class="field">
-            <label class="field-label" for="login-password">Пароль</label>
+            <label class="field-label" for="login-password">{$t('auth.field.password')}</label>
             <input class="input" id="login-password" bind:value={form.login.password} type="password" autocomplete="current-password" required>
           </div>
           <button class="btn btn--primary btn--block btn--lg" type="submit" disabled={loading}>
-            {loading ? 'Входим…' : 'Войти'}
+            {loading ? $t('auth.btn.logging') : $t('auth.btn.login')}
           </button>
-          <a href="#" class="auth-link" on:click|preventDefault={() => (tab = 'reset')}>Забыли пароль?</a>
+          <a href="#" class="auth-link" on:click|preventDefault={() => (tab = 'reset')}>{$t('auth.link.forgot')}</a>
         </form>
       {:else if tab === 'register'}
         <form class="auth-form" on:submit|preventDefault={submitRegister}>
           <div class="field-row">
             <div class="field">
-              <label class="field-label" for="reg-first">Имя</label>
+              <label class="field-label" for="reg-first">{$t('auth.field.firstName')}</label>
               <input class="input" id="reg-first" bind:value={form.register.first_name} type="text">
             </div>
             <div class="field">
-              <label class="field-label" for="reg-last">Фамилия</label>
+              <label class="field-label" for="reg-last">{$t('auth.field.lastName')}</label>
               <input class="input" id="reg-last" bind:value={form.register.last_name} type="text">
             </div>
           </div>
           <div class="field">
-            <label class="field-label" for="reg-username">Логин</label>
+            <label class="field-label" for="reg-username">{$t('auth.field.username')}</label>
             <input class="input" id="reg-username" bind:value={form.register.username} type="text" autocomplete="username" required>
           </div>
           <div class="field">
-            <label class="field-label" for="reg-email">Email</label>
+            <label class="field-label" for="reg-email">{$t('auth.field.email')}</label>
             <input class="input" id="reg-email" bind:value={form.register.email} type="email" autocomplete="email" required>
           </div>
           <div class="field">
-            <label class="field-label" for="reg-password">Пароль</label>
+            <label class="field-label" for="reg-password">{$t('auth.field.password')}</label>
             <input class="input" id="reg-password" bind:value={form.register.password} type="password" autocomplete="new-password" required>
-            <p class="field-hint">Минимум 8 символов, с заглавной, строчной и цифрой.</p>
+            <p class="field-hint">{$t('auth.hint.password')}</p>
           </div>
           <button class="btn btn--primary btn--block btn--lg" type="submit" disabled={loading}>
-            {loading ? 'Создаём…' : 'Создать аккаунт'}
+            {loading ? $t('auth.btn.registering') : $t('auth.btn.register')}
           </button>
         </form>
       {:else if tab === 'reset'}
         <form class="auth-form" on:submit|preventDefault={submitResetRequest}>
           <div class="field">
-            <label class="field-label" for="reset-email">Email</label>
+            <label class="field-label" for="reset-email">{$t('auth.field.email')}</label>
             <input class="input" id="reset-email" bind:value={form.reset.email} type="email" autocomplete="email" required>
           </div>
           <button class="btn btn--primary btn--block btn--lg" type="submit" disabled={loading}>
-            {loading ? 'Отправляем…' : 'Отправить код'}
+            {loading ? $t('auth.btn.sending') : $t('auth.btn.sendCode')}
           </button>
         </form>
       {:else if tab === 'resetConfirm'}
         <form class="auth-form" on:submit|preventDefault={submitResetConfirm}>
           <div class="field">
-            <label class="field-label" for="reset-code">Код подтверждения</label>
+            <label class="field-label" for="reset-code">{$t('auth.field.code')}</label>
             <input class="input" id="reset-code" bind:value={form.resetConfirm.code} type="text" required>
           </div>
           <div class="field">
-            <label class="field-label" for="reset-new">Новый пароль</label>
+            <label class="field-label" for="reset-new">{$t('auth.field.newPassword')}</label>
             <input class="input" id="reset-new" bind:value={form.resetConfirm.new_password} type="password" autocomplete="new-password" required>
           </div>
           <button class="btn btn--primary btn--block btn--lg" type="submit" disabled={loading}>
-            {loading ? 'Сохраняем…' : 'Сбросить пароль'}
+            {loading ? $t('auth.btn.resetting') : $t('auth.btn.reset')}
           </button>
         </form>
       {:else if tab === 'verify'}
         <form class="auth-form" on:submit|preventDefault={submitVerify}>
           <div class="field">
-            <label class="field-label" for="verify-code">Код подтверждения</label>
+            <label class="field-label" for="verify-code">{$t('auth.field.code')}</label>
             <input class="input" id="verify-code" bind:value={form.verify.code} type="text" required>
-            <p class="field-hint">Мы выслали 6-значный код на почту. Если SMTP не настроен — код возвращается в ответе API.</p>
+            <p class="field-hint">{$t('auth.hint.code')}</p>
           </div>
           <button class="btn btn--primary btn--block btn--lg" type="submit" disabled={loading}>
-            {loading ? 'Проверяем…' : 'Подтвердить'}
+            {loading ? $t('auth.btn.verifying') : $t('auth.btn.verify')}
           </button>
-          <button type="button" class="btn btn--secondary btn--block" on:click={doResend} disabled={loading}>Отправить код повторно</button>
+          <button type="button" class="btn btn--secondary btn--block" on:click={doResend} disabled={loading}>{$t('auth.btn.resend')}</button>
         </form>
       {/if}
     </div>

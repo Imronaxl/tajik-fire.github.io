@@ -4,6 +4,7 @@
   import api from '../../lib/api.js';
   import { toasts } from '../../lib/toast.js';
   import { escapeHtml, difficultyClass, debounce } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   let problems = [];
   let loading = true;
@@ -90,35 +91,35 @@
   <header class="page-header">
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <h1>Архив задач</h1>
-        <p>Решай задачи трёх уровней сложности. Отправляй код на Python, C++ или Java и получай вердикт за секунды.</p>
+        <h1>{$t('problems.title')}</h1>
+        <p>{$t('problems.subtitle')}</p>
       </div>
-      <span class="badge badge--brand">{problems.length} задач</span>
+      <span class="badge badge--brand">{$t('problems.count', { count: problems.length })}</span>
     </div>
   </header>
 
   <div class="layout">
     <aside class="sidebar">
       <div class="filter-group">
-        <label class="filter-label">Поиск</label>
-        <input class="input" type="text" placeholder="Поиск по названию…" bind:value={search} on:input={onSearch}>
+        <label class="filter-label">{$t('problems.filter.search')}</label>
+        <input class="input" type="text" placeholder={$t('problems.filter.search')} bind:value={search} on:input={onSearch}>
       </div>
 
       <div class="filter-group">
-        <label class="filter-label">Сложность</label>
+        <label class="filter-label">{$t('problems.filter.difficulty')}</label>
         <div class="pills">
           {#each ['easy', 'medium', 'hard'] as d}
             <button class="pill pill--{d}" class:active={difficulties.has(d)} on:click={() => toggleDiff(d)}>
-              {d === 'easy' ? 'Лёгкие' : d === 'medium' ? 'Средние' : 'Сложные'}
+              {d === 'easy' ? $t('problems.diff.easy') : d === 'medium' ? $t('problems.diff.medium') : $t('problems.diff.hard')}
             </button>
           {/each}
         </div>
       </div>
 
       <div class="filter-group">
-        <label class="filter-label">Категория</label>
+        <label class="filter-label">{$t('problems.filter.category')}</label>
         <div class="pills">
-          <button class="pill" class:active={!category} on:click={() => pickCategory(null)}>Все</button>
+          <button class="pill" class:active={!category} on:click={() => pickCategory(null)}>{$t('common.all')}</button>
           {#each categories as c}
             <button class="pill" class:active={category === c.name} on:click={() => pickCategory(c.name)}>
               {c.name} <span class="text-3">{c.count}</span>
@@ -128,27 +129,27 @@
       </div>
 
       <div class="filter-group">
-        <label class="filter-label">Сортировка</label>
+        <label class="filter-label">{$t('problems.filter.sort')}</label>
         <select class="select" bind:value={sort} on:change={load}>
-          <option value="id-asc">ID по возрастанию</option>
-          <option value="id-desc">ID по убыванию</option>
-          <option value="solved-desc">Больше решений</option>
-          <option value="difficulty-asc">Сначала лёгкие</option>
-          <option value="difficulty-desc">Сначала сложные</option>
+          <option value="id-asc">{$t('problems.sort.idAsc')}</option>
+          <option value="id-desc">{$t('problems.sort.idDesc')}</option>
+          <option value="solved-desc">{$t('problems.sort.solved')}</option>
+          <option value="difficulty-asc">{$t('problems.sort.diffAsc')}</option>
+          <option value="difficulty-desc">{$t('problems.sort.diffDesc')}</option>
         </select>
       </div>
 
-      <button class="btn btn--secondary btn--block btn--sm" on:click={reset}>Сбросить фильтры</button>
+      <button class="btn btn--secondary btn--block btn--sm" on:click={reset}>{$t('problems.filter.reset')}</button>
     </aside>
 
     <section class="main">
       {#if loading}
-        <div class="empty-state"><div class="spinner"></div><p>Загрузка задач…</p></div>
+        <div class="empty-state"><div class="spinner"></div><p>{$t('problems.loading')}</p></div>
       {:else if problems.length === 0}
         <div class="empty-state">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <h3>Ничего не найдено</h3>
-          <p>Попробуйте изменить фильтры.</p>
+          <h3>{$t('problems.empty.title')}</h3>
+          <p>{$t('problems.empty.desc')}</p>
         </div>
       {:else}
         <div class="table">
@@ -162,10 +163,12 @@
                   <span>{p.time_limit}s · {p.memory_limit} MB</span>
                 </div>
               </div>
-              <div class={difficultyClass(p.difficulty)}>{p.difficulty}</div>
+              <div class={difficultyClass(p.difficulty)}>
+                {p.difficulty === 'easy' ? $t('problems.diff.easy') : p.difficulty === 'medium' ? $t('problems.diff.medium') : $t('problems.diff.hard')}
+              </div>
               <div class="row__solved">
                 <strong>{p.solved_count}</strong>
-                <span>решили</span>
+                <span>{$t('problems.row.solved')}</span>
               </div>
             </a>
           {/each}

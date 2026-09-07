@@ -3,6 +3,7 @@
   import api from '../../lib/api.js';
   import { toasts } from '../../lib/toast.js';
   import { formatDate, initials } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   let items = [];
   let loading = true;
@@ -17,16 +18,16 @@
 
 <div class="page">
   <header class="page-header">
-    <h1>Новости</h1>
-    <p>Обновления продукта, релизы и редакционные материалы от команды tajik-fire.</p>
+    <h1>{$t('news.title')}</h1>
+    <p>{$t('news.subtitle')}</p>
   </header>
 
   {#if loading}
-    <div class="empty-state"><div class="spinner"></div><p>Загрузка новостей…</p></div>
+    <div class="empty-state"><div class="spinner"></div><p>{$t('news.loading')}</p></div>
   {:else if items.length === 0}
     <div class="empty-state">
-      <h3>Новостей пока нет</h3>
-      <p>Обновления появятся здесь после публикации.</p>
+      <h3>{$t('news.empty.title')}</h3>
+      <p>{$t('news.empty.desc')}</p>
     </div>
   {:else}
     <div class="list">
@@ -34,7 +35,7 @@
         <article class="news-item">
           <div class="news-item__meta">
             <div class="avatar avatar--xs avatar--gradient">{initials(n.author_username || 'TF')}</div>
-            <strong>{n.author_username || 'tajik-fire team'}</strong>
+            <strong>{n.author_username || $t('news.author')}</strong>
             <span>·</span>
             <span>{formatDate(n.published_at || n.created_at)}</span>
           </div>

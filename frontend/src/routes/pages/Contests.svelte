@@ -3,6 +3,7 @@
   import api from '../../lib/api.js';
   import { toasts } from '../../lib/toast.js';
   import { formatDate } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   let items = [];
   let loading = true;
@@ -17,17 +18,17 @@
 
 <div class="page">
   <header class="page-header">
-    <h1>Контесты</h1>
-    <p>Текущие и предстоящие соревнования. Участвуй, чтобы проверить скорость и точность.</p>
+    <h1>{$t('contests.title')}</h1>
+    <p>{$t('contests.subtitle')}</p>
   </header>
 
   {#if loading}
-    <div class="empty-state"><div class="spinner"></div><p>Загрузка контестов…</p></div>
+    <div class="empty-state"><div class="spinner"></div><p>{$t('contests.loading')}</p></div>
   {:else if items.length === 0}
     <div class="empty-state">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
-      <h3>Контесты не запланированы</h3>
-      <p>Заглядывайте позже — мы добавляем соревнования еженедельно.</p>
+      <h3>{$t('contests.empty.title')}</h3>
+      <p>{$t('contests.empty.desc')}</p>
     </div>
   {:else}
     <div class="grid">
@@ -39,12 +40,12 @@
         {@const upcoming = start > now}
         <article class="contest-card">
           {#if live}
-            <span class="contest-card__live badge badge--ok"><span class="live-dot"></span> Идёт</span>
+            <span class="contest-card__live badge badge--ok"><span class="live-dot"></span> {$t('contests.live')}</span>
           {:else if upcoming}
-            <span class="contest-card__live badge badge--brand">Скоро</span>
+            <span class="contest-card__live badge badge--brand">{$t('contests.upcoming')}</span>
           {/if}
           <h3 class="contest-card__title">{c.title}</h3>
-          <p class="contest-card__desc">{c.description || 'Описание отсутствует.'}</p>
+          <p class="contest-card__desc">{c.description || 'Тавсиф нест.'}</p>
           <div class="contest-card__meta">
             <div>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
