@@ -3,6 +3,7 @@
   import { push } from '../../lib/router.js';
   import api from '../../lib/api.js';
   import { toasts } from '../../lib/toast.js';
+  import { t } from '../../core/i18n/index.js';
 
   let modules = [];
   let loading = true;
@@ -17,26 +18,26 @@
 
 <div class="page">
   <header class="page-header">
-    <h1>Учебные треки</h1>
-    <p>Структурированные пути от основ до продвинутой алгоритмической подготовки. Каждый трек объединяет теорию с graded-задачами.</p>
+    <h1>{$t('learning.title')}</h1>
+    <p>{$t('learning.subtitle')}</p>
   </header>
 
   {#if loading}
-    <div class="empty-state"><div class="spinner"></div><p>Загрузка модулей…</p></div>
+    <div class="empty-state"><div class="spinner"></div><p>{$t('learning.loading')}</p></div>
   {:else if modules.length === 0}
     <div class="empty-state">
-      <h3>Модулей пока нет</h3>
-      <p>Заглядывайте позже — мы добавляем треки еженедельно.</p>
+      <h3>{$t('learning.empty.title')}</h3>
+      <p>{$t('learning.empty.desc')}</p>
     </div>
   {:else}
     <div class="grid">
       {#each modules as m}
         <a class="module-card" href={`/learning/${m.slug}`} on:click|preventDefault={() => push(`/learning/${m.slug}`)}>
-          <div class="module-card__number">МОДУЛЬ {String(m.order).padStart(2, '0')}</div>
+          <div class="module-card__number">{$t('learning.module')} {String(m.order).padStart(2, '0')}</div>
           <h3 class="module-card__title">{m.title}</h3>
           <p class="module-card__desc">{m.description || m.theory_excerpt}</p>
           <div class="module-card__progress"><div class="module-card__progress-bar" style="width:0%"></div></div>
-          <div class="text-xs text-3">Открыть модуль</div>
+          <div class="text-xs text-3">{$t('learning.open')}</div>
         </a>
       {/each}
     </div>

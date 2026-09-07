@@ -5,6 +5,7 @@
   import { user } from '../../lib/auth.js';
   import { toasts } from '../../lib/toast.js';
   import { renderMarkdown, difficultyClass, verdictClass, verdictLabel, languageLabel, relativeTime, escapeHtml } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   export let params;
 
@@ -40,7 +41,7 @@ public class Main {
 
   onMount(async () => {
     if (!$user) {
-      toasts.warning('Войдите, чтобы отправлять решения.');
+      toasts.warning($t('toast.loginRequired'));
       setTimeout(() => push(`/login?next=/problems/${params.id}/solve`), 800);
       return;
     }
@@ -75,13 +76,13 @@ public class Main {
   }
 
   function reset() {
-    if (!confirm('Сбросить редактор к стартовому шаблону?')) return;
+    if (!confirm($t('editor.confirm.reset'))) return;
     code = STARTER[lang] || '';
     onCodeInput();
   }
 
   async function submit() {
-    if (!code.trim()) return toasts.warning('Сначала напишите код.');
+    if (!code.trim()) return toasts.warning($t('editor.placeholder'));
     submitting = true;
     try {
       const submission = await api.post('/problems/submissions', {
@@ -109,9 +110,9 @@ public class Main {
           pollTimer = null;
           results = results.map((r) => (r.id === submissionId ? { ...s, polling: false } : r));
           if (s.verdict === 'accepted') {
-            toasts.success(`Accepted! ${s.test_passed}/${s.test_total} тестов.`);
+            toasts.success(`{$t('verdict.accepted')}! ${s.test_passed}/${s.test_total} {$t('editor.verdict.tests')}`);
           } else {
-            toasts.error(`${verdictLabel(s.verdict)} на тесте ${s.test_passed + 1}`);
+            toasts.error(`${verdictLabel(s.verdict, $t)} — ${$t('problem.test')} ${s.test_passed + 1}`);
           }
         }
       } catch (_) { }
@@ -127,24 +128,26 @@ public class Main {
   <div class="editor-layout">
     <aside class="aside">
       <a href="/problems" class="back" on:click|preventDefault={() => push('/problems')}>
-        ← Архив
+        ← {$t('problem.back')}
       </a>
       {#if loading}
         <div class="empty-state"><div class="spinner"></div></div>
       {:else if problem}
         <div class="header">
           <div class="flex items-center gap-2 mb-2 flex-wrap">
-            <span class={difficultyClass(problem.difficulty)}>{problem.difficulty}</span>
+            <span class={difficultyClass(problem.difficulty)}>
+              {problem.difficulty === 'easy' ? $t('problems.diff.easy') : problem.difficulty === 'medium' ? $t('problems.diff.medium') : $t('problems.diff.hard')}
+            </span>
             {#if problem.category}<span class="badge">{problem.category}</span>{/if}
           </div>
           <h1>{problem.title}</h1>
-          <p class="text-xs text-3 mt-2">{problem.time_limit}s · {problem.memory_limit} MB · {problem.solved_count} решили</p>
+          <p class="text-xs text-3 mt-2">{$t('problem.meta', { time: problem.time_limit, memory: problem.memory_limit, count: problem.solved_count })}</p>
         </div>
         <div class="statement">
           {@html renderMarkdown(problem.statement || 'Условие недоступно.')}
-          {#if problem.input_format}<h3>Вход</h3><p>{@html renderMarkdown(problem.input_format)}</p>{/if}
-          {#if problem.output_format}<h3>Выход</h3><p>{@html renderMarkdown(problem.output_format)}</p>{/if}
-          {#if problem.notes}<h3>Примечание</h3><p>{@html renderMarkdown(problem.notes)}</p>{/if}
+          {#if problem.input_format}<h3>{$t('problem.input')}</h3><p>{@html renderMarkdown(problem.input_format)}</p>{/if}
+          {#if problem.output_format}<h3>{$t('problem.output')}</h3><p>{@html renderMarkdown(problem.output_format)}</p>{/if}
+          {#if problem.notes}<h3>Эзоҳ</h3><p>{@html renderMarkdown(problem.notes)}</p>{/if}
         </div>
       {/if}
     </aside>
@@ -157,13 +160,13 @@ public class Main {
           <option value="java11">Java 11</option>
         </select>
         <div class="flex items-center gap-2">
-          <button class="btn btn--ghost btn--sm" on:click={reset}>Сбросить</button>
+          <button class="btn btn--ghost btn--sm" on:click={reset}>{$t('editor.reset')}</button>
           <button class="btn btn--primary btn--sm" on:click={submit} disabled={submitting}>
             {#if submitting}
               <div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>
-              Отправка…
+              {$t('editor.submitting')}
             {:else}
-              Отправить
+              {$t('editor.submit')}
             {/if}
           </button>
         </div>
@@ -174,12 +177,12 @@ public class Main {
         on:input={onCodeInput}
         spellcheck="false"
         autocomplete="off"
-        placeholder="// напишите решение здесь"
+        placeholder={$t('editor.placeholder')}
       ></textarea>
       <div class="results">
         {#if results.length === 0}
           <div class="empty-state">
-            <p class="text-xs text-3">Отправьте код, чтобы увидеть вердикт.</p>
+            <p class="text-xs text-3">{$t('editor.results.empty')}</p>
           </div>
         {:else}
           {#each results as r (r.id)}
@@ -194,13 +197,13 @@ public class Main {
                 {/if}
               </div>
               <div class="verdict-card__main">
-                <div class="verdict-card__title">Сабмит #{r.id} · {languageLabel(r.language)}</div>
+                <div class="verdict-card__title">{$t('submissions.title')} #{r.id} · {languageLabel(r.language)}</div>
                 <div class="verdict-card__meta">
                   {#if r.polling}
-                    Judging…
+                    {$t('editor.verdict.judging')}
                   {:else}
-                    <span class={verdictClass(r.verdict)}>{verdictLabel(r.verdict)}</span>
-                    · {r.test_passed}/{r.test_total} тестов
+                    <span class={verdictClass(r.verdict)}>{verdictLabel(r.verdict, $t)}</span>
+                    · {$t('editor.verdict.tests', { passed: r.test_passed, total: r.test_total })}
                     {#if r.execution_time}· {r.execution_time}s{/if}
                     {#if r.memory_used}· {r.memory_used} MB{/if}
                     · {relativeTime(new Date(r.created_at))}

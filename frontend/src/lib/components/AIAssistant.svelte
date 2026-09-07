@@ -45,15 +45,16 @@
     <header class="ai-panel__header">
       <div class="flex items-center gap-2">
         <div class="ai-dot"></div>
-        <strong>{$t('ai.title')}</strong>
+        <strong>{$t('ai.panel.title')}</strong>
         <span class="badge badge--warn">{$t('ai.placeholder')}</span>
       </div>
-      <button class="ai-panel__close" on:click={toggle} aria-label="Close">×</button>
+      <button class="ai-panel__close" on:click={toggle} aria-label={$t('ai.panel.close')}>×</button>
     </header>
     <div class="ai-panel__body">
       {#if messages.length === 0}
         <div class="ai-empty">
-          <p>{$t('ai.comingSoon')}</p>
+          <p>{$t('ai.panel.empty')}</p>
+          <p class="text-3 text-xs mt-2">{$t('ai.comingSoon')}</p>
         </div>
       {:else}
         {#each messages as msg, i}
@@ -62,7 +63,7 @@
       {/if}
     </div>
     <form class="ai-panel__input" on:submit|preventDefault={send}>
-      <input class="input" bind:value={draft} placeholder="Савол нависед..." disabled={loading}>
+      <input class="input" bind:value={draft} placeholder={$t('ai.panel.input')} disabled={loading}>
       <button class="btn btn--primary btn--icon" type="submit" disabled={loading || !draft.trim()}>
         {#if loading}
           <div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>

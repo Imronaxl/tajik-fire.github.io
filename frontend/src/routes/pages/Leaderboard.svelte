@@ -3,6 +3,7 @@
   import api from '../../lib/api.js';
   import { toasts } from '../../lib/toast.js';
   import { initials, escapeHtml } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   let items = [];
   let loading = true;
@@ -17,16 +18,16 @@
 
 <div class="page">
   <header class="page-header">
-    <h1>Рейтинг</h1>
-    <p>Лучшие разработчики платформы. Очки рейтинга начисляются за первое решение задачи: easy +5, medium +12, hard +25.</p>
+    <h1>{$t('leaderboard.title')}</h1>
+    <p>{$t('leaderboard.subtitle')}</p>
   </header>
 
   {#if loading}
-    <div class="empty-state"><div class="spinner"></div><p>Загрузка рейтинга…</p></div>
+    <div class="empty-state"><div class="spinner"></div><p>{$t('leaderboard.loading')}</p></div>
   {:else if items.length === 0}
     <div class="empty-state">
-      <h3>Пока пусто</h3>
-      <p>Реши первую задачу, чтобы попасть в рейтинг.</p>
+      <h3>{$t('leaderboard.empty.title')}</h3>
+      <p>{$t('leaderboard.empty.desc')}</p>
     </div>
   {:else}
     <div class="podium">
@@ -37,7 +38,7 @@
           <div class="podium-card__name">{u.username}</div>
           <div class="podium-card__rating">
             <strong>{u.rating}</strong>
-            очков
+            {$t('leaderboard.points')}
           </div>
         </div>
       {/each}
@@ -46,10 +47,10 @@
     <div class="table">
       <div class="row row--head">
         <div>#</div>
-        <div>Разработчик</div>
-        <div>Рейтинг</div>
-        <div>Решено</div>
-        <div>Сабмитов</div>
+        <div>{$t('leaderboard.col.user')}</div>
+        <div>{$t('leaderboard.col.rating')}</div>
+        <div>{$t('leaderboard.col.solved')}</div>
+        <div>{$t('leaderboard.col.attempts')}</div>
       </div>
       {#each items as u}
         <div class="row">

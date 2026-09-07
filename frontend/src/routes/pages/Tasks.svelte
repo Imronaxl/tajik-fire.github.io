@@ -5,6 +5,7 @@
   import { toasts } from '../../lib/toast.js';
   import { escapeHtml } from '../../lib/utils.js';
   import { push } from '../../lib/router.js';
+  import { t } from '../../core/i18n/index.js';
 
   let tasks = [];
   let showForm = false;
@@ -13,7 +14,7 @@
 
   onMount(async () => {
     if (!$user) {
-      toasts.warning('Войдите, чтобы управлять задачами.');
+      toasts.warning($t('toast.loginRequired'));
       setTimeout(() => push(`/login?next=/tasks`), 800);
       return;
     }
@@ -42,10 +43,10 @@
     try {
       if (editingId) {
         await api.patch(`/tasks/${editingId}`, form);
-        toasts.success('Задача обновлена');
+        toasts.success($t('tasks.toast.updated'));
       } else {
         await api.post('/tasks/', form);
-        toasts.success('Задача создана');
+        toasts.success($t('tasks.toast.created'));
       }
       showForm = false;
       await load();
@@ -53,10 +54,10 @@
   }
 
   async function remove(id) {
-    if (!confirm('Удалить задачу?')) return;
+    if (!confirm($t('tasks.confirm.delete'))) return;
     try {
       await api.delete(`/tasks/${id}`);
-      toasts.success('Задача удалена');
+      toasts.success($t('tasks.toast.deleted'));
       await load();
     } catch (err) { toasts.error(err.message); }
   }
@@ -88,10 +89,10 @@
   <header class="page-header">
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <h1>Задачи</h1>
-        <p>Лёгкий трекер для учебного плана. Статус и приоритет помогают держать фокус.</p>
+        <h1>{$t('tasks.title')}</h1>
+        <p>{$t('tasks.subtitle')}</p>
       </div>
-      <button class="btn btn--primary btn--sm" on:click={openCreate}>+ Новая задача</button>
+      <button class="btn btn--primary btn--sm" on:click={openCreate}>+ {$t('tasks.btn.new')}</button>
     </div>
   </header>
 
@@ -101,9 +102,11 @@
         class="column"
         on:drop={drop(status)}
         on:dragover|preventDefault
+        role="region"
+        aria-label={status}
       >
         <header>
-          <h3>{status === 'todo' ? 'To do' : status === 'in_progress' ? 'В работе' : 'Готово'}</h3>
+          <h3>{status === 'todo' ? $t('tasks.col.todo') : status === 'in_progress' ? $t('tasks.col.progress') : $t('tasks.col.done')}</h3>
           <span class="badge">{cols[status].length}</span>
         </header>
         <div class="column__body">
@@ -121,7 +124,7 @@
             </div>
           {/each}
           {#if cols[status].length === 0}
-            <div class="column__empty">Перетащите сюда задачи</div>
+            <div class="column__empty">{$t('tasks.col.empty')}</div>
           {/if}
         </div>
       </div>
@@ -134,40 +137,40 @@
     <div class="modal__overlay" on:click={() => (showForm = false)} role="presentation"></div>
     <div class="modal__content modal__content--sm">
       <header class="modal__header">
-        <h2 class="modal__title">{editingId ? 'Редактировать задачу' : 'Новая задача'}</h2>
-        <button class="modal__close" on:click={() => (showForm = false)} aria-label="Закрыть">×</button>
+        <h2 class="modal__title">{editingId ? $t('tasks.modal.edit') : $t('tasks.modal.new')}</h2>
+        <button class="modal__close" on:click={() => (showForm = false)} aria-label={$t('common.close')}>×</button>
       </header>
       <div class="modal__body">
         <div class="field">
-          <label class="field-label" for="task-title">Заголовок</label>
+          <label class="field-label" for="task-title">{$t('tasks.field.title')}</label>
           <input class="input" id="task-title" bind:value={form.title} type="text" required>
         </div>
         <div class="field">
-          <label class="field-label" for="task-desc">Описание</label>
+          <label class="field-label" for="task-desc">{$t('tasks.field.description')}</label>
           <textarea class="textarea" id="task-desc" bind:value={form.description} rows="3"></textarea>
         </div>
         <div class="field-row">
           <div class="field">
-            <label class="field-label" for="task-status">Статус</label>
+            <label class="field-label" for="task-status">{$t('tasks.field.status')}</label>
             <select class="select" id="task-status" bind:value={form.status}>
-              <option value="todo">To do</option>
-              <option value="in_progress">В работе</option>
-              <option value="done">Готово</option>
+              <option value="todo">{$t('tasks.col.todo')}</option>
+              <option value="in_progress">{$t('tasks.col.progress')}</option>
+              <option value="done">{$t('tasks.col.done')}</option>
             </select>
           </div>
           <div class="field">
-            <label class="field-label" for="task-prio">Приоритет</label>
+            <label class="field-label" for="task-prio">{$t('tasks.field.priority')}</label>
             <select class="select" id="task-prio" bind:value={form.priority}>
-              <option value="low">Низкий</option>
-              <option value="medium">Средний</option>
-              <option value="high">Высокий</option>
+              <option value="low">{$t('tasks.priority.low')}</option>
+              <option value="medium">{$t('tasks.priority.medium')}</option>
+              <option value="high">{$t('tasks.priority.high')}</option>
             </select>
           </div>
         </div>
         <div class="flex gap-2 mt-4">
-          <button class="btn btn--primary btn--block" on:click={save}>Сохранить</button>
+          <button class="btn btn--primary btn--block" on:click={save}>{$t('tasks.btn.save')}</button>
           {#if editingId}
-            <button class="btn btn--danger" on:click={() => remove(editingId)}>Удалить</button>
+            <button class="btn btn--danger" on:click={() => remove(editingId)}>{$t('tasks.btn.delete')}</button>
           {/if}
         </div>
       </div>

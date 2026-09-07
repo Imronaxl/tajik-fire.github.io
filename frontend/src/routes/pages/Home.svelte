@@ -89,7 +89,7 @@ public class Main {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          Verdict: <strong>Accepted</strong> · 4 / 4 tests · 28&nbsp;мс · 8&nbsp;МБ
+          {$t('verdict.accepted')} · 4 / 4 тестҳо · 28&nbsp;мс · 8&nbsp;МБ
         </div>
       </div>
     </div>
@@ -178,7 +178,7 @@ public class Main {
             <span>{languageLabel(entry.language)}</span>
           </div>
           <div class="feed-row__meta">
-            <span class={verdictClass(entry.verdict)}>{verdictLabel(entry.verdict)}</span>
+            <span class={verdictClass(entry.verdict)}>{verdictLabel(entry.verdict, $t)}</span>
             {#if entry.execution_time}<span>{entry.execution_time}s</span>{/if}
           </div>
         </a>
@@ -200,7 +200,7 @@ public class Main {
   .hero__inner {
     display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--sp-12); align-items: center;
   }
-  .hero__tagline {
+  .hero__tag {
     display: inline-flex; align-items: center; gap: var(--sp-2);
     padding: 4px 12px; background: var(--brand-soft);
     border: 1px solid rgba(91, 140, 255, 0.25); border-radius: var(--r-full);

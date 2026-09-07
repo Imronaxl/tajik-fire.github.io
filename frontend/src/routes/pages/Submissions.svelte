@@ -4,18 +4,19 @@
   import api from '../../lib/api.js';
   import { toasts } from '../../lib/toast.js';
   import { initials, relativeTime, verdictClass, verdictLabel, languageLabel } from '../../lib/utils.js';
+  import { t } from '../../core/i18n/index.js';
 
   let items = [];
   let loading = true;
   let verdictFilter = '';
 
   const verdicts = [
-    { id: '', label: 'Все' },
-    { id: 'accepted', label: 'Accepted' },
-    { id: 'wrong_answer', label: 'Wrong answer' },
-    { id: 'time_limit_exceeded', label: 'TLE' },
-    { id: 'runtime_error', label: 'Runtime error' },
-    { id: 'compilation_error', label: 'Compile error' },
+    { id: '', label: $t('common.all') },
+    { id: 'accepted', label: $t('verdict.accepted') },
+    { id: 'wrong_answer', label: $t('verdict.wrongAnswer') },
+    { id: 'time_limit_exceeded', label: $t('verdict.tle') },
+    { id: 'runtime_error', label: $t('verdict.runtimeError') },
+    { id: 'compilation_error', label: $t('verdict.compileError') },
   ];
 
   onMount(load);
@@ -33,8 +34,8 @@
 
 <div class="page">
   <header class="page-header">
-    <h1>Сабмиты</h1>
-    <p>Лента всех вердиктов платформы. Фильтруй по вердикту или языку, чтобы копнуть глубже.</p>
+    <h1>{$t('submissions.title')}</h1>
+    <p>{$t('submissions.subtitle')}</p>
   </header>
 
   <div class="pills mb-4">
@@ -46,19 +47,19 @@
   <div class="table">
     <div class="row row--head">
       <div>#</div>
-      <div>Разработчик</div>
-      <div>Задача</div>
-      <div>Язык</div>
-      <div>Вердикт</div>
-      <div>Время</div>
-      <div>Когда</div>
+      <div>{$t('submissions.col.user')}</div>
+      <div>{$t('submissions.col.problem')}</div>
+      <div>{$t('submissions.col.language')}</div>
+      <div>{$t('submissions.col.verdict')}</div>
+      <div>{$t('submissions.col.time')}</div>
+      <div>{$t('submissions.col.when')}</div>
     </div>
     {#if loading}
-      <div class="empty-state"><div class="spinner"></div><p>Загрузка…</p></div>
+      <div class="empty-state"><div class="spinner"></div><p>{$t('common.loading')}</p></div>
     {:else if filtered.length === 0}
       <div class="empty-state">
-        <h3>Нет сабмитов</h3>
-        <p>{verdictFilter ? 'Попробуйте другой фильтр.' : 'Будьте первым, кто отправит решение.'}</p>
+        <h3>{$t('submissions.empty.title')}</h3>
+        <p>{$t('submissions.empty.desc')}</p>
       </div>
     {:else}
       {#each filtered as entry}
@@ -72,7 +73,7 @@
             <a href={`/problems/${entry.problem_id}`} on:click|preventDefault={() => push(`/problems/${entry.problem_id}`)}>{entry.problem_title}</a>
           </div>
           <div><span class="lang-badge">{languageLabel(entry.language)}</span></div>
-          <div><span class={verdictClass(entry.verdict)}>{verdictLabel(entry.verdict)}</span></div>
+          <div><span class={verdictClass(entry.verdict)}>{verdictLabel(entry.verdict, $t)}</span></div>
           <div class="time">{entry.execution_time ? entry.execution_time + 's' : '—'}</div>
           <div class="when">{relativeTime(new Date(entry.created_at))}</div>
         </div>
