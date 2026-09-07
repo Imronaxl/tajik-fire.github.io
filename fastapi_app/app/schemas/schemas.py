@@ -1,9 +1,11 @@
-from pydantic import BaseModel, EmailStr, field_validator
-from typing import Optional, List
-from datetime import datetime
 import re
-from app.utils.validators import is_safe_avatar_url
+from datetime import datetime
 from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, EmailStr, field_validator
+
+from app.utils.validators import is_safe_avatar_url
 
 
 class LanguageEnum(str, Enum):
@@ -34,31 +36,31 @@ class UserBase(BaseModel):
     email: EmailStr
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    
-    @field_validator('username')
+
+    @field_validator("username")
     @classmethod
-    def validate_username(cls, v):
-        if not re.match(r'^[a-zA-Z0-9_-]+$', v):
-            raise ValueError('Username can only contain alphanumeric characters, underscores, and hyphens')
-        if len(v) < 3 or len(v) > 50:
-            raise ValueError('Username must be between 3 and 50 characters')
+    def validate_username(cls, v: str) -> str:
+        if not re.match(r"^[a-zA-Z0-9_-]+$", v):
+            raise ValueError("username may only contain letters, digits, underscores and hyphens")
+        if not (3 <= len(v) <= 50):
+            raise ValueError("username length must be between 3 and 50")
         return v
 
 
 class UserCreate(UserBase):
     password: str
-    
-    @field_validator('password')
+
+    @field_validator("password")
     @classmethod
-    def validate_password(cls, v):
+    def validate_password(cls, v: str) -> str:
         if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
-        if not re.search(r'[A-Z]', v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        if not re.search(r'[a-z]', v):
-            raise ValueError('Password must contain at least one lowercase letter')
-        if not re.search(r'\d', v):
-            raise ValueError('Password must contain at least one digit')
+            raise ValueError("password must be at least 8 characters long")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("password must contain at least one lowercase letter")
+        if not re.search(r"\d", v):
+            raise ValueError("password must contain at least one digit")
         return v
 
 
@@ -66,35 +68,46 @@ class UserLogin(BaseModel):
     login: str
     password: str
 
+
 class UserResponse(UserBase):
     id: int
     avatar_url: Optional[str] = None
     is_verified: bool
+    is_active: bool
+    rating: int
+    solved_count: int
+    attempt_count: int
     created_at: datetime
 
     model_config = {"from_attributes": True}
-    
-    @field_validator('avatar_url')
+
+    @field_validator("avatar_url")
     @classmethod
-    def validate_avatar_url(cls, v):
+    def validate_avatar_url(cls, v: Optional[str]) -> Optional[str]:
         if v and not is_safe_avatar_url(v):
-            raise ValueError('Invalid or unsafe avatar URL')
+            return "default.svg"
         return v
+
 
 class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+    user: Optional[UserResponse] = None
+
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
+
 class MessageBase(BaseModel):
     content: str
+
 
 class MessageCreate(MessageBase):
     receiver_id: Optional[int] = None
     chat_id: Optional[int] = None
+
 
 class MessageResponse(MessageBase):
     id: int
@@ -106,22 +119,26 @@ class MessageResponse(MessageBase):
 
     model_config = {"from_attributes": True}
 
+
 class ChatBase(BaseModel):
     name: Optional[str] = None
     is_group: bool = False
 
+
 class ChatCreate(ChatBase):
     member_ids: Optional[List[int]] = None
+
 
 class ChatResponse(ChatBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    members: Optional[List[UserResponse]] = []
+    members: List[UserResponse] = []
     last_message: Optional[MessageResponse] = None
     unread_count: int = 0
 
     model_config = {"from_attributes": True}
+
 
 class TaskBase(BaseModel):
     title: str
@@ -129,8 +146,17 @@ class TaskBase(BaseModel):
     status: str = "todo"
     priority: str = "medium"
 
+
 class TaskCreate(TaskBase):
     pass
+
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+
 
 class TaskResponse(TaskBase):
     id: int
@@ -188,8 +214,8 @@ class ProblemBase(BaseModel):
 
 
 class ProblemCreate(ProblemBase):
-    translations: List[ProblemTranslationBase]
-    test_cases: List[TestCaseBase]
+    translations: List[ProblemTranslationBase] = []
+    test_cases: List[TestCaseBase] = []
 
 
 class ProblemUpdate(BaseModel):
@@ -207,11 +233,19 @@ class ProblemResponse(ProblemBase):
     author_id: Optional[int] = None
     created_at: datetime
     updated_at: datetime
+    solved_count: int = 0
     translations: List[ProblemTranslationResponse] = []
     test_cases: List[TestCaseResponse] = []
-    solved_count: int = 0
 
     model_config = {"from_attributes": True}
+
+
+class ProblemDetailResponse(ProblemResponse):
+    statement: Optional[str] = None
+    input_format: Optional[str] = None
+    output_format: Optional[str] = None
+    notes: Optional[str] = None
+    language: Optional[str] = None
 
 
 class SubmissionBase(BaseModel):
@@ -257,8 +291,8 @@ class SubmissionFeedEntry(BaseModel):
 
 class ContestProblemBase(BaseModel):
     problem_id: int
-    position: int
-    points: int = 1
+    position: Optional[int] = None
+    points: Optional[int] = 1
 
 
 class ContestBase(BaseModel):
@@ -270,7 +304,8 @@ class ContestBase(BaseModel):
 
 
 class ContestCreate(ContestBase):
-    problems: List[ContestProblemBase] = []
+    problem_ids: List[int] = []
+    is_published: bool = False
 
 
 class ContestResponse(ContestBase):
@@ -281,12 +316,6 @@ class ContestResponse(ContestBase):
     problems: List[ContestProblemBase] = []
 
     model_config = {"from_attributes": True}
-
-
-class FriendshipBase(BaseModel):
-    user_id: int
-    friend_id: int
-    status: str = "requested"
 
 
 class FriendshipResponse(BaseModel):
@@ -328,11 +357,27 @@ class EmailVerifyRequest(BaseModel):
     code: Optional[str] = None
 
 
-class PasswordResetRequest(BaseModel):
-    email: EmailStr
-
-
 class PasswordResetConfirm(BaseModel):
     email: EmailStr
     code: str
     new_password: str
+
+
+class LeaderboardEntry(BaseModel):
+    rank: int
+    user_id: int
+    username: str
+    avatar_url: Optional[str] = None
+    rating: int
+    solved_count: int
+    attempt_count: int
+
+
+class DashboardStats(BaseModel):
+    total_users: int
+    total_problems: int
+    total_submissions: int
+    total_solved: int
+    accepted_rate: float
+    recent_feed: List[SubmissionFeedEntry] = []
+    top_users: List[LeaderboardEntry] = []

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard · DevStudio Pro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/leaderboard.css">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+  <header class="page-header">
+    <h1>Leaderboard</h1>
+    <p>Top developers ranked by rating. Earn points by solving problems — easy +5, medium +12, hard +25.</p>
+  </header>
+
+  <div class="podium" id="podium"></div>
+
+  <div class="leaderboard-table">
+    <div class="leaderboard-row leaderboard-row--head">
+      <div>#</div>
+      <div>Developer</div>
+      <div>Rating</div>
+      <div>Solved</div>
+      <div>Attempts</div>
+    </div>
+    <div id="leaderboard-body">
+      <div class="empty-state">
+        <div class="spinner"></div>
+        <p>Loading leaderboard…</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="/static/js/pages/leaderboard.js"></script>
+{% endblock %}

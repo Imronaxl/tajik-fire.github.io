@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}DevStudio Pro — Competitive programming, learning & collaboration{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/home.css">
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container">
+    <div class="hero__inner">
+      <div>
+        <span class="hero__tagline">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          v{{ project_version }} · stable
+        </span>
+        <h1>
+          Write code.<br>
+          Get judged <span class="accent">fairly</span>.<br>
+          Climb the ranks.
+        </h1>
+        <p class="hero__subtitle">
+          A competitive programming platform with a sandboxed judger for Python, C++ and Java,
+          structured learning tracks, real-time submission feed, and a social layer
+          for friends and direct messages — all in one workspace.
+        </p>
+        <div class="hero__actions">
+          <a href="/register" class="btn btn--primary btn--lg">
+            Start solving
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+          <a href="/problems" class="btn btn--secondary btn--lg">Browse problems</a>
+        </div>
+        <div class="hero__meta">
+          <div class="hero__meta-item">
+            <strong id="stat-problems">—</strong>
+            <small>Problems</small>
+          </div>
+          <div class="hero__meta-item">
+            <strong id="stat-users">—</strong>
+            <small>Developers</small>
+          </div>
+          <div class="hero__meta-item">
+            <strong id="stat-submissions">—</strong>
+            <small>Submissions</small>
+          </div>
+          <div class="hero__meta-item">
+            <strong id="stat-accepted">—</strong>
+            <small>Acceptance rate</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__panel">
+        <div class="code-tabs">
+          <button class="code-tab active" type="button" data-lang="python">solution.py</button>
+          <button class="code-tab" type="button" data-lang="cpp">solution.cpp</button>
+          <button class="code-tab" type="button" data-lang="java">Main.java</button>
+        </div>
+        <pre class="code-panel" id="code-preview"><span class="kw">def</span> <span class="fn">main</span>():
+    a, b = <span class="fn">map</span>(<span class="fn">int</span>, <span class="fn">input</span>().<span class="fn">split</span>())
+    <span class="fn">print</span>(a + b)
+
+<span class="fn">main</span>()</pre>
+        <div class="code-result">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Verdict: <strong>Accepted</strong> · 4 / 4 tests · 28&nbsp;ms · 8&nbsp;MB
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="margin-bottom: var(--space-12);">
+  <div class="section-header">
+    <div>
+      <h2>Everything you need to grow as a developer</h2>
+      <p>From your first <code class="code-inline">A + B</code> to advanced algorithmic reasoning.</p>
+    </div>
+  </div>
+  <div class="grid grid--3">
+    <div class="feature-card">
+      <div class="feature-card__icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+      </div>
+      <h3>Sandboxed judger</h3>
+      <p>Submit Python, C++17 or Java11. Each submission runs in an isolated process with memory and time caps, then is matched against sample and hidden test cases.</p>
+    </div>
+    <div class="feature-card feature-card--purple">
+      <div class="feature-card__icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      </div>
+      <h3>Learning tracks</h3>
+      <p>Bite-sized modules with theory and graded practice problems. Track your progress per module and earn rating points for every accepted solution.</p>
+    </div>
+    <div class="feature-card feature-card--teal">
+      <div class="feature-card__icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      </div>
+      <h3>Social layer</h3>
+      <p>Friend requests, direct and group chats, a public submission feed and a global leaderboard. Stay accountable and watch your peers climb.</p>
+    </div>
+    <div class="feature-card feature-card--warning">
+      <div class="feature-card__icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+      </div>
+      <h3>Rating system</h3>
+      <p>Solve harder problems, climb faster. Easy +5, medium +12, hard +25 rating points per first-solve. The leaderboard refreshes in real time.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card__icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path></svg>
+      </div>
+      <h3>Personal tasks</h3>
+      <p>Keep your study plan in one place. Create tasks, set status and priority, track what is in progress and what is shipped.</p>
+    </div>
+    <div class="feature-card feature-card--purple">
+      <div class="feature-card__icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+      </div>
+      <h3>Three languages</h3>
+      <p>Statements are translated into English, Russian and Tajik. Switch the language on any problem page — your progress follows.</p>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="margin-bottom: var(--space-16);">
+  <div class="section-header">
+    <div>
+      <h2>Live submission feed</h2>
+      <p>Latest judgements from the entire platform.</p>
+    </div>
+    <a href="/submissions">View all
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </a>
+  </div>
+  <div class="feed-list" id="home-feed">
+    <div class="feed-empty">
+      <div class="spinner" style="margin: 0 auto var(--space-3);"></div>
+      Loading recent submissions…
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="/static/js/pages/home.js"></script>
+{% endblock %}

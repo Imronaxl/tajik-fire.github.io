@@ -1,220 +1,138 @@
-
-import asyncio
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any, Dict
+
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.models import (
-    Submission, Problem, TestCase, ProblemSolve, SubmissionFeed,
-    Verdict, ProgrammingLanguage
+    Problem,
+    ProblemSolve,
+    Submission,
+    SubmissionFeed,
+    TestCase,
+    User,
+    Verdict,
 )
-from .runner import get_runner
-from .verifiers import Verifier
-from .languages import get_language_config
+from app.services.judger.languages import get_language_config
+from app.services.judger.runner import get_runner
+from app.services.judger.verifiers import Verifier
 
 
 class JudgerService:
-    
-    
-    def __init__(self, db_session: AsyncSession):
-        self.db = db_session
+
+    def __init__(self, db: AsyncSession):
+        self.db = db
         self.runner = get_runner()
-    
+
     async def judge_submission(self, submission_id: int) -> Dict[str, Any]:
-        
+        sub_result = await self.db.execute(select(Submission).where(Submission.id == submission_id))
+        submission = sub_result.scalar_one_or_none()
+        if submission is None:
+            return {"error": "submission not found"}
 
-        result = await self.db.execute(
-            select(Submission).where(Submission.id == submission_id)
-        )
-        submission = result.scalar_one_or_none()
-        
-        if not submission:
-            return {"error": "Submission not found"}
-        
-
-        problem_result = await self.db.execute(
-            select(Problem)
-            .where(Problem.id == submission.problem_id)
-        )
+        problem_result = await self.db.execute(select(Problem).where(Problem.id == submission.problem_id))
         problem = problem_result.scalar_one_or_none()
-        
-        if not problem:
-            return {"error": "Problem not found"}
-        
+        if problem is None:
+            return {"error": "problem not found"}
 
         submission.verdict = Verdict.JUDGING
         await self.db.commit()
-        
 
         lang_config = get_language_config(submission.language)
-        if not lang_config:
+        if lang_config is None:
             submission.verdict = Verdict.COMPILATION_ERROR
-            submission.error_message = f"Unsupported language: {submission.language}"
+            submission.error_message = f"unsupported language: {submission.language}"
             submission.judged_at = datetime.now(timezone.utc)
             await self.db.commit()
-            return {"verdict": "compilation_error", "error": "Unsupported language"}
-        
+            return {"verdict": "compilation_error", "error": submission.error_message}
 
-        test_cases_result = await self.db.execute(
+        cases_result = await self.db.execute(
             select(TestCase)
             .where(TestCase.problem_id == problem.id)
-            .order_by(TestCase.test_order)
+            .order_by(TestCase.test_order.asc())
         )
-        test_cases = test_cases_result.scalars().all()
-        
+        test_cases = list(cases_result.scalars().all())
         if not test_cases:
             submission.verdict = Verdict.RUNTIME_ERROR
-            submission.error_message = "No test cases found"
+            submission.error_message = "no test cases"
             submission.judged_at = datetime.now(timezone.utc)
             await self.db.commit()
-            return {"verdict": "runtime_error", "error": "No test cases"}
-        
+            return {"verdict": "runtime_error", "error": "no test cases"}
 
-        total_tests = len(test_cases)
-        passed_tests = 0
-        max_execution_time = 0.0
-        max_memory_used = 0
-        
-        for i, test_case in enumerate(test_cases):
+        total = len(test_cases)
+        passed = 0
+        peak_time = 0.0
+        peak_memory = 0
+        verdict = Verdict.ACCEPTED
+        error_message: str | None = None
 
-            stdout, stderr, exec_time, memory_used, error = await self.runner.run(
+        for idx, test_case in enumerate(test_cases, start=1):
+            stdout, stderr, exec_time, memory_used, err = await self.runner.run(
                 code=submission.code,
                 language=submission.language,
                 input_data=test_case.input_data,
                 time_limit=problem.time_limit,
                 memory_limit=problem.memory_limit,
             )
-            
+            peak_time = max(peak_time, exec_time)
+            peak_memory = max(peak_memory, memory_used)
 
-            max_execution_time = max(max_execution_time, exec_time)
-            max_memory_used = max(max_memory_used, memory_used)
-            
-
-            if error:
-                if "Compilation" in error:
-                    submission.verdict = Verdict.COMPILATION_ERROR
-                    submission.error_message = error
-                    submission.judged_at = datetime.now(timezone.utc)
-                    await self.db.commit()
-                    return {
-                        "verdict": "compilation_error",
-                        "error": error,
-                        "test_passed": 0,
-                        "test_total": total_tests,
-                    }
-                elif "Time Limit" in error:
-                    submission.verdict = Verdict.TIME_LIMIT_EXCEEDED
-                    submission.error_message = f"TLE on test {i + 1}"
-                    submission.execution_time = max_execution_time
-                    submission.memory_used = max_memory_used
-                    submission.test_passed = passed_tests
-                    submission.test_total = total_tests
-                    submission.judged_at = datetime.now(timezone.utc)
-                    await self.db.commit()
-                    return {
-                        "verdict": "time_limit_exceeded",
-                        "test_passed": passed_tests,
-                        "test_total": total_tests,
-                        "execution_time": max_execution_time,
-                        "memory_used": max_memory_used,
-                    }
-                elif "Memory" in error or "MLE" in error:
-                    submission.verdict = Verdict.MEMORY_LIMIT_EXCEEDED
-                    submission.error_message = f"MLE on test {i + 1}"
-                    submission.execution_time = max_execution_time
-                    submission.memory_used = max_memory_used
-                    submission.test_passed = passed_tests
-                    submission.test_total = total_tests
-                    submission.judged_at = datetime.now(timezone.utc)
-                    await self.db.commit()
-                    return {
-                        "verdict": "memory_limit_exceeded",
-                        "test_passed": passed_tests,
-                        "test_total": total_tests,
-                        "execution_time": max_execution_time,
-                        "memory_used": max_memory_used,
-                    }
+            if err:
+                lowered = err.lower()
+                if "compilation" in lowered:
+                    verdict = Verdict.COMPILATION_ERROR
+                    error_message = err
+                elif "time limit" in lowered:
+                    verdict = Verdict.TIME_LIMIT_EXCEEDED
+                    error_message = f"TLE on test {idx}"
+                elif "memory" in lowered or "mle" in lowered:
+                    verdict = Verdict.MEMORY_LIMIT_EXCEEDED
+                    error_message = f"MLE on test {idx}"
                 else:
-                    submission.verdict = Verdict.RUNTIME_ERROR
-                    submission.error_message = f"{error} on test {i + 1}"
-                    submission.execution_time = max_execution_time
-                    submission.memory_used = max_memory_used
-                    submission.test_passed = passed_tests
-                    submission.test_total = total_tests
-                    submission.judged_at = datetime.now(timezone.utc)
-                    await self.db.commit()
-                    return {
-                        "verdict": "runtime_error",
-                        "error": error,
-                        "test_passed": passed_tests,
-                        "test_total": total_tests,
-                        "execution_time": max_execution_time,
-                        "memory_used": max_memory_used,
-                    }
-            
+                    verdict = Verdict.RUNTIME_ERROR
+                    error_message = f"{err} on test {idx}"
+                break
 
-            is_correct, verify_error = Verifier.compare_outputs(
-                stdout,
-                test_case.expected_output
-            )
-            
-            if is_correct:
-                passed_tests += 1
-            else:
-                submission.verdict = Verdict.WRONG_ANSWER
-                submission.error_message = f"WA on test {i + 1}: {verify_error}"
-                submission.execution_time = max_execution_time
-                submission.memory_used = max_memory_used
-                submission.test_passed = passed_tests
-                submission.test_total = total_tests
-                submission.judged_at = datetime.now(timezone.utc)
-                await self.db.commit()
-                return {
-                    "verdict": "wrong_answer",
-                    "error": verify_error,
-                    "test_passed": passed_tests,
-                    "test_total": total_tests,
-                    "execution_time": max_execution_time,
-                    "memory_used": max_memory_used,
-                }
-        
+            ok, verify_err = Verifier.compare_outputs(stdout or "", test_case.expected_output)
+            if not ok:
+                verdict = Verdict.WRONG_ANSWER
+                error_message = f"WA on test {idx}"
+                if verify_err:
+                    error_message += f": {verify_err}"
+                break
+            passed += 1
 
-        submission.verdict = Verdict.ACCEPTED
-        submission.execution_time = max_execution_time
-        submission.memory_used = max_memory_used
-        submission.test_passed = total_tests
-        submission.test_total = total_tests
+        submission.verdict = verdict
+        submission.execution_time = round(peak_time, 4)
+        submission.memory_used = peak_memory
+        submission.test_passed = passed
+        submission.test_total = total
+        submission.error_message = error_message
         submission.judged_at = datetime.now(timezone.utc)
-        
 
-        existing_solve = await self.db.execute(
-            select(ProblemSolve).where(
-                ProblemSolve.user_id == submission.user_id,
-                ProblemSolve.problem_id == submission.problem_id
+        if verdict == Verdict.ACCEPTED:
+            existing = await self.db.execute(
+                select(ProblemSolve).where(
+                    ProblemSolve.user_id == submission.user_id,
+                    ProblemSolve.problem_id == submission.problem_id,
+                )
             )
-        )
-        
-        if not existing_solve.scalar_one_or_none():
+            if existing.scalar_one_or_none() is None:
+                self.db.add(
+                    ProblemSolve(
+                        user_id=submission.user_id,
+                        problem_id=submission.problem_id,
+                        submission_id=submission.id,
+                        attempts_before_solve=max(0, total - passed),
+                    )
+                )
+                user_result = await self.db.execute(select(User).where(User.id == submission.user_id))
+                user = user_result.scalar_one_or_none()
+                if user is not None:
+                    user.solved_count = (user.solved_count or 0) + 1
+                    user.rating = (user.rating or 0) + _rating_gain(problem.difficulty)
 
-            solve = ProblemSolve(
-                user_id=submission.user_id,
-                problem_id=submission.problem_id,
-                submission_id=submission.id,
-                attempts_before_solve=submission.test_total - passed_tests,
-            )
-            self.db.add(solve)
-            
-
-            from app.models.models import User
-            user_result = await self.db.execute(
-                select(User).where(User.id == submission.user_id)
-            )
-            user = user_result.scalar_one()
-            user.solved_count += 1
-        
         await self.db.commit()
-        
 
         feed_entry = SubmissionFeed(
             submission_id=submission.id,
@@ -227,39 +145,21 @@ class JudgerService:
         )
         self.db.add(feed_entry)
         await self.db.commit()
-        
+
         return {
-            "verdict": "accepted",
-            "test_passed": total_tests,
-            "test_total": total_tests,
-            "execution_time": max_execution_time,
-            "memory_used": max_memory_used,
-        }
-    
-    async def rejudge_problem(self, problem_id: int) -> Dict[str, Any]:
-        
-        result = await self.db.execute(
-            select(Submission)
-            .where(Submission.problem_id == problem_id)
-            .order_by(Submission.created_at)
-        )
-        submissions = result.scalars().all()
-        
-        results = []
-        for submission in submissions:
-            result = await self.judge_submission(submission.id)
-            results.append({
-                "submission_id": submission.id,
-                "result": result,
-            })
-        
-        return {
-            "total": len(results),
-            "results": results,
+            "verdict": verdict.value,
+            "test_passed": passed,
+            "test_total": total,
+            "execution_time": submission.execution_time,
+            "memory_used": submission.memory_used,
+            "error": error_message,
         }
 
 
-async def process_submission(submission_id: int, db_session: AsyncSession):
-    
-    judger = JudgerService(db_session)
-    return await judger.judge_submission(submission_id)
+def _rating_gain(difficulty: str) -> int:
+    return {"easy": 5, "medium": 12, "hard": 25}.get(difficulty, 5)
+
+
+async def judge_submission(db: AsyncSession, submission_id: int) -> Dict[str, Any]:
+    service = JudgerService(db)
+    return await service.judge_submission(submission_id)

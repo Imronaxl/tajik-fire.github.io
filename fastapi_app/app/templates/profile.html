@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Profile · DevStudio Pro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/profile.css">
+{% endblock %}
+
+{% block content %}
+<div class="page profile-page">
+  <div class="profile-header">
+    <div class="profile-header__avatar avatar avatar--xl" id="profile-avatar">?</div>
+    <div class="profile-header__info">
+      <div class="flex items-center gap-2 flex-wrap mb-2">
+        <h1 id="profile-username">—</h1>
+        <span class="badge badge--accent" id="profile-rating">— rating</span>
+      </div>
+      <p class="text-secondary" id="profile-fullname">—</p>
+      <p class="text-tertiary text-sm mt-2" id="profile-meta">—</p>
+    </div>
+    <div class="profile-header__actions">
+      <button class="btn btn--secondary btn--sm" id="profile-edit-btn" type="button">Edit profile</button>
+    </div>
+  </div>
+
+  <div class="grid grid--4 mb-8">
+    <div class="stat-card">
+      <div class="stat-card__label">Solved</div>
+      <div class="stat-card__value" id="stat-solved">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Submissions</div>
+      <div class="stat-card__value" id="stat-submissions">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Accepted</div>
+      <div class="stat-card__value" id="stat-accepted">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Success rate</div>
+      <div class="stat-card__value" id="stat-rate">—</div>
+    </div>
+  </div>
+
+  <div class="grid grid--2">
+    <div>
+      <div class="section-header">
+        <h2>Recent submissions</h2>
+      </div>
+      <div class="feed-list" id="profile-feed"></div>
+    </div>
+    <div>
+      <div class="section-header">
+        <h2>Account settings</h2>
+      </div>
+      <div class="card">
+        <div class="card__body">
+          <form id="change-password-form">
+            <div class="field">
+              <label class="field-label" for="cp-old">Current password</label>
+              <input class="input" id="cp-old" name="old_password" type="password" required>
+            </div>
+            <div class="field">
+              <label class="field-label" for="cp-new">New password</label>
+              <input class="input" id="cp-new" name="new_password" type="password" required>
+              <p class="field-hint">Min 8 characters, with uppercase, lowercase and a digit.</p>
+            </div>
+            <button type="submit" class="btn btn--primary btn--block">Update password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="edit-modal" aria-hidden="true">
+  <div class="modal__overlay" data-modal-close></div>
+  <div class="modal__content modal__content--sm">
+    <header class="modal__header">
+      <h2 class="modal__title">Edit profile</h2>
+      <button class="modal__close" data-modal-close type="button" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </header>
+    <div class="modal__body">
+      <form id="edit-profile-form">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="edit-first">First name</label>
+            <input class="input" id="edit-first" name="first_name" type="text">
+          </div>
+          <div class="field">
+            <label class="field-label" for="edit-last">Last name</label>
+            <input class="input" id="edit-last" name="last_name" type="text">
+          </div>
+        </div>
+        <button type="submit" class="btn btn--primary btn--block">Save changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="/static/js/pages/profile.js"></script>
+{% endblock %}
